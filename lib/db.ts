@@ -100,4 +100,45 @@ db.exec(`
   ON qualites(formulaire_joueur_id)
 `);
 
+// Créer la table saisons pour stocker les saisons de chaque joueur
+db.exec(`
+  CREATE TABLE IF NOT EXISTS saisons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    formulaire_joueur_id INTEGER NOT NULL,
+    club TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    division TEXT NOT NULL,
+    logo_club TEXT NOT NULL,
+    logo_division TEXT NOT NULL,
+    badge_capitanat INTEGER DEFAULT 0 CHECK(badge_capitanat IN (0, 1)),
+    badge_surclasse INTEGER DEFAULT 0 CHECK(badge_surclasse IN (0, 1)),
+    badge_champion INTEGER DEFAULT 0 CHECK(badge_champion IN (0, 1)),
+    badge_coupe_remportee INTEGER DEFAULT 0 CHECK(badge_coupe_remportee IN (0, 1)),
+    matchs INTEGER,
+    buts INTEGER,
+    passes_decisives INTEGER,
+    temps_jeu_moyen INTEGER CHECK(temps_jeu_moyen IS NULL OR (temps_jeu_moyen >= 1 AND temps_jeu_moyen <= 90)),
+    saison_actuelle INTEGER DEFAULT 0 CHECK(saison_actuelle IN (0, 1)),
+    ordre INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (formulaire_joueur_id) REFERENCES formulaires_joueur(id) ON DELETE CASCADE
+  )
+`);
+
+// Créer un index pour améliorer les performances
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_saisons_formulaire_joueur_id 
+  ON saisons(formulaire_joueur_id)
+`);
+
+// Créer un trigger pour mettre à jour updated_at
+db.exec(`
+  CREATE TRIGGER IF NOT EXISTS update_saisons_timestamp 
+  AFTER UPDATE ON saisons
+  BEGIN
+    UPDATE saisons SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+  END
+`);
+
 export default db;
