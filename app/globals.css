@@ -9,6 +9,14 @@
   --color-scout-card: #111111;
   --color-scout-text: #ffffff;
   --color-scout-muted: #9ca3af;
+
+  /* Couleurs CV */
+  --color-cv-azure: #1E5EFF;
+  --color-cv-terracotta: #C46A4A;
+  --color-cv-olive: #5B6B3A;
+  --color-cv-navy: #0F2A43;
+  --color-cv-sable: #D6C6A8;
+  --color-cv-bordeaux: #7A1E3A;
 }
 
 :root {

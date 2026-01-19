@@ -6,7 +6,7 @@ import { identitySchema, linksSchema } from "@/lib/schemas";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { ArrowRight, Check } from "lucide-react";
 import { z } from "zod";
-import clsx from "clsx";
+import { clsx } from "clsx";
 
 // Combine schemas for this specific step (Identity + Links + Photo)
 // Removed Physical schema as requested
@@ -18,7 +18,7 @@ const step1Schema = identitySchema
 
 type Step1Data = z.infer<typeof step1Schema>;
 
-const CV_COLORS = ["#FF9900", "#22c55e", "#3b82f6", "#ec4899", "#a855f7"];
+const CV_COLORS = ["#1E5EFF", "#C46A4A", "#5B6B3A", "#0F2A43", "#D6C6A8", "#7A1E3A"];
 
 export function IdentityStep() {
     const { data, updateData, setStep } = usePlayerStore();
@@ -34,7 +34,7 @@ export function IdentityStep() {
             email: data.email || "",
             phone: data.phone || "",
             birthDate: data.birthDate || "",
-            cvColor: (data.cvColor as any) || "#FF9900",
+            cvColor: (data.cvColor as any) || "#1E5EFF",
 
             // Links & Media
             statsLink: data.statsLink || "",
