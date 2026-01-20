@@ -1,0 +1,52 @@
+{
+  "nom": "Dupont",
+  "prenom": "Jean",
+  "nationalites": ["France"],
+  "date_naissance": "2000-05-15",
+  "pied_fort": "Droit",
+  "taille_cm": 175,
+  "couleur_cv": "#1E5EFF",
+  "poste_principal": "Milieu",
+  "photo_joueur": "/photos/dupont.jpg",
+  "email": "jean.dupont@example.com",
+  "telephone": "+33612345678",
+  "qualites": [
+    "Technique",
+    "Passe"
+  ],
+  "saisons": [
+    {
+      "club": "Olympique Lyon",
+      "categorie": "U19",
+      "division": "Ligue 1",
+      "logo_club": "/logos/ol.png",
+      "logo_division": "/logos/ligue1.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": false,
+      "matchs": 20,
+      "buts": 5,
+      "passes_decisives": 8,
+      "temps_jeu_moyen": 70,
+      "saison_actuelle": false,
+      "ordre": 0
+    }
+  ],
+  "formations": [
+    {
+      "annee_ou_periode": "2020-2023",
+      "titre_structure": "Centre de Formation OL",
+      "details": null,
+      "ordre": 0
+    }
+  ],
+  "interets": [
+    {
+      "club": "Paris Saint-Germain",
+      "annee": "2024",
+      "logo_club": "/logos/psg.png",
+      "ordre": 0
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "nom": "Mbappé",
+  "prenom": "Kylian",
+  "nationalites": ["France"],
+  "date_naissance": "1998-12-20",
+  "pied_fort": "Droit",
+  "taille_cm": 178,
+  "couleur_cv": "#1E5EFF",
+  "poste_principal": "Attaquant",
+  "poste_secondaire": "Ailier gauche",
+  "url_transfermarkt": "https://www.transfermarkt.fr/kylian-mbappe/profil/spieler/342229",
+  "photo_joueur": "/photos/mbappe.jpg",
+  "vma": 18.5,
+  "envergure": null,
+  "email": "kylian.mbappe@example.com",
+  "telephone": "+33612345678",
+  "email_agent_sportif": "agent@example.com",
+  "telephone_agent_sportif": "+33687654321",
+  "qualites": [
+    "Vitesse",
+    "Finition",
+    "Dribble",
+    "Vision de jeu"
+  ],
+  "saisons": [
+    {
+      "club": "Paris Saint-Germain",
+      "categorie": "Séniors",
+      "division": "Ligue 1",
+      "logo_club": "/logos/psg.png",
+      "logo_division": "/logos/ligue1.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": true,
+      "matchs": 35,
+      "buts": 28,
+      "passes_decisives": 7,
+      "temps_jeu_moyen": 85,
+      "saison_actuelle": true,
+      "ordre": 0
+    },
+    {
+      "club": "AS Monaco",
+      "categorie": "Séniors",
+      "division": "Ligue 1",
+      "logo_club": "/logos/monaco.png",
+      "logo_division": "/logos/ligue1.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": false,
+      "matchs": 29,
+      "buts": 15,
+      "passes_decisives": 11,
+      "temps_jeu_moyen": 78,
+      "saison_actuelle": false,
+      "ordre": 1
+    }
+  ],
+  "formations": [
+    {
+      "annee_ou_periode": "2010-2015",
+      "titre_structure": "AS Bondy",
+      "details": "Formation complète de la catégorie U11 à U17",
+      "ordre": 0
+    },
+    {
+      "annee_ou_periode": "2015-2017",
+      "titre_structure": "Centre de Formation AS Monaco",
+      "details": "Formation professionnelle, intégration en équipe première",
+      "ordre": 1
+    },
+    {
+      "annee_ou_periode": "2017",
+      "titre_structure": "Sélection France U19",
+      "details": "Champion d'Europe U19",
+      "ordre": 2
+    }
+  ],
+  "interets": [
+    {
+      "club": "Real Madrid",
+      "annee": "2024",
+      "logo_club": "/logos/real-madrid.png",
+      "ordre": 0
+    },
+    {
+      "club": "Liverpool FC",
+      "annee": "2024",
+      "logo_club": "/logos/liverpool.png",
+      "ordre": 1
+    }
+  ]
+}
