@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, Plus, X } from "lucide-react";
 import { FormulaireJoueur, POSTES } from "@/lib/types";
 
 export default function EditFormulairePage() {
@@ -11,6 +11,7 @@ export default function EditFormulairePage() {
   const formulaireId = params.id as string;
 
   const [formulaire, setFormulaire] = useState<FormulaireJoueur | null>(null);
+  const [qualites, setQualites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,9 @@ export default function EditFormulairePage() {
 
         if (data.success) {
           setFormulaire(data.data);
+          // Initialiser les qualités depuis le formulaire
+          const qualitesArray = data.data.qualites?.map((q: any) => q.libelle) || [];
+          setQualites(qualitesArray);
         } else {
           setError(data.error || "Erreur lors du chargement du formulaire");
         }
@@ -43,6 +47,23 @@ export default function EditFormulairePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formulaire) return;
+
+    // Validation des qualités
+    const validQualites = qualites.filter((q) => q.trim().length > 0);
+    if (validQualites.length === 0) {
+      setError("Au moins une qualité est requise");
+      return;
+    }
+    if (validQualites.length > 6) {
+      setError("Maximum 6 qualités autorisées");
+      return;
+    }
+    for (const qualite of validQualites) {
+      if (qualite.length > 24) {
+        setError(`La qualité "${qualite}" dépasse 24 caractères`);
+        return;
+      }
+    }
 
     setSaving(true);
     setError(null);
@@ -74,6 +95,7 @@ export default function EditFormulairePage() {
           telephone_agent_sportif: formulaire.telephone_agent_sportif,
           status: formulaire.status,
           archive: formulaire.archive,
+          qualites: validQualites,
         }),
       });
 
@@ -98,6 +120,33 @@ export default function EditFormulairePage() {
   const handleChange = (field: keyof FormulaireJoueur, value: any) => {
     if (!formulaire) return;
     setFormulaire({ ...formulaire, [field]: value });
+  };
+
+  const addQualite = () => {
+    if (qualites.length >= 6) {
+      setError("Maximum 6 qualités autorisées");
+      return;
+    }
+    setQualites([...qualites, ""]);
+  };
+
+  const removeQualite = (index: number) => {
+    if (qualites.length <= 1) {
+      setError("Au moins une qualité est requise");
+      return;
+    }
+    setQualites(qualites.filter((_, i) => i !== index));
+  };
+
+  const updateQualite = (index: number, value: string) => {
+    if (value.length > 24) {
+      setError("Une qualité ne peut pas dépasser 24 caractères");
+      return;
+    }
+    const newQualites = [...qualites];
+    newQualites[index] = value;
+    setQualites(newQualites);
+    setError(null);
   };
 
   if (loading) {
@@ -446,6 +495,53 @@ export default function EditFormulairePage() {
                     className="input-field h-12"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Qualités */}
+            <div className="bg-scout-card border border-white/10 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wide border-b border-white/10 pb-3 flex-1">
+                  Qualités
+                </h2>
+                <button
+                  type="button"
+                  onClick={addQualite}
+                  disabled={qualites.length >= 6}
+                  className="bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter
+                </button>
+              </div>
+              <div className="space-y-3">
+                {qualites.map((qualite, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={qualite}
+                      onChange={(e) => updateQualite(index, e.target.value)}
+                      maxLength={24}
+                      placeholder={`Qualité ${index + 1} (max 24 caractères)`}
+                      className="input-field flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeQualite(index)}
+                      disabled={qualites.length <= 1}
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Supprimer cette qualité"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+                {qualites.length === 0 && (
+                  <p className="text-white/40 text-sm italic">Aucune qualité. Cliquez sur "Ajouter" pour en ajouter une.</p>
+                )}
+                <p className="text-white/60 text-xs mt-2">
+                  {qualites.length}/6 qualités • Maximum 24 caractères par qualité
+                </p>
               </div>
             </div>
 
