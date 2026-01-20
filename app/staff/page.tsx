@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, User, MapPin, Filter, ChevronDown, X, EllipsisVertical, Eye, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, MapPin, Filter, ChevronDown, X, EllipsisVertical, Eye, Trash2, Copy } from "lucide-react";
 import { FormulaireJoueur } from "@/lib/types";
 
 export default function StaffPage() {
@@ -13,6 +13,7 @@ export default function StaffPage() {
   const [statusFilter, setStatusFilter] = useState<'À traiter' | 'Traité' | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openActionsMenu, setOpenActionsMenu] = useState<number | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -93,6 +94,102 @@ export default function StaffPage() {
   const getFilterLabel = () => {
     if (statusFilter === null) return "Tous les statuts";
     return statusFilter;
+  };
+
+  const duplicateFormulaire = async (formulaireId: number) => {
+    setDuplicatingId(formulaireId);
+    try {
+      // Récupérer le formulaire complet
+      const response = await fetch(`/api/formulaires-joueur/${formulaireId}`);
+      const data = await response.json();
+
+      if (!data.success || !data.data) {
+        setError("Erreur lors de la récupération du formulaire");
+        return;
+      }
+
+      const formulaire = data.data;
+
+      // Préparer les données pour la duplication (sans l'ID)
+      const duplicateData = {
+        nom: formulaire.nom,
+        prenom: formulaire.prenom,
+        nationalites: formulaire.nationalites,
+        date_naissance: formulaire.date_naissance,
+        pied_fort: formulaire.pied_fort,
+        taille_cm: formulaire.taille_cm,
+        couleur_cv: formulaire.couleur_cv,
+        poste_principal: formulaire.poste_principal,
+        poste_secondaire: formulaire.poste_secondaire,
+        url_transfermarkt: formulaire.url_transfermarkt,
+        photo_joueur: formulaire.photo_joueur,
+        vma: formulaire.vma,
+        envergure: formulaire.envergure,
+        email: formulaire.email,
+        telephone: formulaire.telephone,
+        email_agent_sportif: formulaire.email_agent_sportif,
+        telephone_agent_sportif: formulaire.telephone_agent_sportif,
+        qualites: formulaire.qualites?.map((q: any) => q.libelle) || [],
+        saisons: formulaire.saisons?.map((s: any) => ({
+          club: s.club,
+          categorie: s.categorie,
+          division: s.division,
+          logo_club: s.logo_club,
+          logo_division: s.logo_division,
+          badge_capitanat: s.badge_capitanat,
+          badge_surclasse: s.badge_surclasse,
+          badge_champion: s.badge_champion,
+          badge_coupe_remportee: s.badge_coupe_remportee,
+          matchs: s.matchs,
+          buts: s.buts,
+          passes_decisives: s.passes_decisives,
+          temps_jeu_moyen: s.temps_jeu_moyen,
+          saison_actuelle: s.saison_actuelle,
+          ordre: s.ordre,
+        })) || [],
+        formations: formulaire.formations?.map((f: any) => ({
+          annee_ou_periode: f.annee_ou_periode,
+          titre_structure: f.titre_structure,
+          details: f.details,
+          ordre: f.ordre,
+        })) || [],
+        interets: formulaire.interets?.map((i: any) => ({
+          club: i.club,
+          annee: i.annee,
+          logo_club: i.logo_club,
+          ordre: i.ordre,
+        })) || [],
+      };
+
+      // Créer le nouveau formulaire
+      const createResponse = await fetch("/api/formulaires-joueur", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(duplicateData),
+      });
+
+      const createData = await createResponse.json();
+
+      if (createData.success) {
+        // Recharger la liste des formulaires
+        const listResponse = await fetch("/api/formulaires-joueur");
+        const listData = await listResponse.json();
+        
+        if (listData.success) {
+          setFormulaires(listData.data || []);
+        }
+        setOpenActionsMenu(null);
+      } else {
+        setError(createData.error || "Erreur lors de la duplication");
+      }
+    } catch (err) {
+      setError("Erreur lors de la duplication du formulaire");
+      console.error(err);
+    } finally {
+      setDuplicatingId(null);
+    }
   };
 
   return (
@@ -342,6 +439,26 @@ export default function StaffPage() {
                                       >
                                         <Eye className="w-4 h-4" />
                                         Voir les détails
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          duplicateFormulaire(formulaire.id!);
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        disabled={duplicatingId === formulaire.id}
+                                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-2 border-t border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                        {duplicatingId === formulaire.id ? (
+                                          <>
+                                            <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                            Duplication...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Copy className="w-4 h-4" />
+                                            Dupliquer
+                                          </>
+                                        )}
                                       </button>
                                       <button
                                         onClick={async () => {
