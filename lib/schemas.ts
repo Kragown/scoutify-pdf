@@ -1,24 +1,33 @@
 import { z } from "zod";
 
-// Identity & Contact Schema
+// Identity & Contact Schema - Updated
 export const identitySchema = z.object({
     firstName: z.string().min(2, "Le prénom doit faire au moins 2 caractères"),
     lastName: z.string().min(2, "Le nom doit faire au moins 2 caractères"),
-    nationality: z.string().min(2, "Nationalité requise"),
+    nationalities: z.array(z.string()).min(1, "Au moins une nationalité requise"),
     birthDate: z.string().refine((date) => new Date(date).toString() !== 'Invalid Date', { message: "Date invalide" }),
     email: z.string().email("Email invalide"),
     phone: z.string().min(10, "Numéro valide requis"),
-    agentName: z.string().optional(),
-    agentPhone: z.string().optional(),
+    emailAgent: z.string().email("Email agent invalide").optional().or(z.literal("")),
+    phoneAgent: z.string().optional(),
+    isInternational: z.boolean().default(false),
+    internationalLevel: z.string().optional(),
+    internationalCountry: z.string().optional(),
     cvColor: z.enum(["#1E5EFF", "#C46A4A", "#5B6B3A", "#0F2A43", "#D6C6A8", "#7A1E3A"]).default("#1E5EFF"),
-});
+}).refine(
+    (data) => !data.isInternational || (data.internationalLevel && data.internationalCountry),
+    {
+        message: "Niveau et pays requis si joueur international",
+        path: ["internationalLevel"]
+    }
+);
 
 // Physical Schema
 export const physicalSchema = z.object({
     height: z.string().min(2, "Taille requise (ex: 185)"),
     strongFoot: z.enum(["Droit", "Gauche", "Ambidextre"], { message: "Sélectionnez un pied" }),
-    vma: z.string().optional(), // Can be string input, parsed later
-    envergure: z.string().optional(), // For GK
+    vma: z.string().optional(),
+    envergure: z.string().optional(),
 });
 
 // Position Schema
@@ -48,6 +57,15 @@ export const careerStepSchema = z.object({
     club: z.string().min(2, "Club requis"),
     category: z.string().optional(),
     division: z.string().optional(),
+    badge_capitanat: z.boolean().optional(),
+    badge_surclasse: z.boolean().optional(),
+    badge_champion: z.boolean().optional(),
+    badge_coupe_remportee: z.boolean().optional(),
+    matchs: z.number().nullable().optional(),
+    buts: z.number().nullable().optional(),
+    passes_decisives: z.number().nullable().optional(),
+    temps_jeu_moyen: z.number().nullable().optional(),
+    saison_actuelle: z.boolean().optional(),
 });
 
 // Saison Schema (From Backend)
@@ -81,7 +99,6 @@ export const saisonSchema = z.object({
     saison_actuelle: z.boolean().default(false),
     ordre: z.number().int().min(0).default(0),
 }).refine((data) => {
-    // Matchs obligatoire sauf saison actuelle
     if (!data.saison_actuelle && (data.matchs === null || data.matchs === undefined)) {
         return false;
     }
@@ -110,8 +127,8 @@ export const formationsSchema = z.array(formationSchema).min(1, "Au moins une fo
 
 // Interet Schema (From Backend)
 export const interetSchema = z.object({
-    club: z.string().min(1, "Le nom du club est requis"),
-    annee: z.string().min(1, "L'année est requise"),
+    club: z.string().min(1, "Le nom du club est requis").max(200, "Maximum 200 caractères"),
+    annee: z.string().length(4, "L'année doit comporter 4 chiffres").regex(/^\d{4}$/, "Année invalide"),
     logo_club: z.string().min(1, "Le logo du club est obligatoire"),
     ordre: z.number().int().min(0).default(0),
 });
@@ -126,8 +143,8 @@ export const fullPlayerSchema = identitySchema
     .extend({
         photoUrl: z.string().optional(),
         qualites: qualitesSchema.optional(),
-        career: z.array(careerStepSchema).optional(), // Frontend version of career
-        saisons: saisonsSchema.optional(), // Backend version of career
+        career: z.array(careerStepSchema).optional(),
+        saisons: saisonsSchema.optional(),
         formations: formationsSchema.optional(),
         interets: interetsSchema.optional(),
     });

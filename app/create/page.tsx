@@ -6,8 +6,8 @@ import Link from 'next/link';
 
 export default function CreateCVPage() {
     const { currentStep } = usePlayerStore();
-    const totalSteps = 3;
-    const progress = (currentStep / totalSteps) * 100;
+    const totalSteps = 6;
+    const progress = (Math.min(currentStep, totalSteps) / totalSteps) * 100;
 
     return (
         <div className="min-h-screen bg-scout-dark text-white flex flex-col font-sans">
@@ -20,7 +20,7 @@ export default function CreateCVPage() {
                     </span>
                 </Link>
                 <div className="text-sm font-medium text-scout-muted">
-                    Étape {Math.min(currentStep, 3)} sur 3
+                    Étape {Math.min(currentStep, totalSteps)} sur {totalSteps}
                 </div>
             </header>
 
