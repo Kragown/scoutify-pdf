@@ -52,6 +52,7 @@ export interface CreateFormulaireJoueurDto {
   telephone: string; // format international
   email_agent_sportif?: string | null;
   telephone_agent_sportif?: string | null; // format international
+  status?: 'À traiter' | 'Traité';
   qualites?: string[]; // Array de qualités (1 à 6, max 24 caractères chacune)
   saisons?: CreateSaisonDto[]; // Array de saisons (1 à plusieurs)
   formations?: CreateFormationDto[]; // Array de formations (1 à plusieurs)

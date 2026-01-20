@@ -435,6 +435,16 @@ export async function PUT(
       updates.push('telephone_agent_sportif = ?');
       values.push(body.telephone_agent_sportif);
     }
+    if (body.status !== undefined) {
+      if (body.status !== 'À traiter' && body.status !== 'Traité') {
+        return NextResponse.json(
+          { success: false, error: 'Le statut doit être "À traiter" ou "Traité"' },
+          { status: 400 }
+        );
+      }
+      updates.push('status = ?');
+      values.push(body.status);
+    }
 
     const updateFormulaire = db.transaction(() => {
       if (updates.length > 0) {
