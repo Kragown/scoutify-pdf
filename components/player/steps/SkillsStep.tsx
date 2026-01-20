@@ -28,8 +28,16 @@ const QUALITIES_LIST = [
     "Jeu de tête", "Tacles", "Marquage", "Réflexes (GB)", "Jeu au pied (GB)"
 ];
 
+const DIVISIONS = [
+    'Ligue 1', 'Ligue 2', 'National', 'National 2', 'National 3',
+    'Régional 1', 'Régional 2', 'Régional 3',
+    'Départemental 1', 'Départemental 2', 'Départemental 3',
+    'Autre'
+];
+
 export function SkillsStep() {
     const { data, updateData, setStep } = usePlayerStore();
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     const form = useForm<SkillsData>({
         resolver: zodResolver(skillsStepSchema),
@@ -46,10 +54,93 @@ export function SkillsStep() {
         name: "career"
     });
 
-    const onSubmit = (formData: SkillsData) => {
-        // @ts-ignore
+    const onSubmit = async (formData: SkillsData) => {
+        setIsSubmitting(true);
         updateData(formData);
-        setStep(4); // Or finish
+
+        const completeData = { ...data, ...formData };
+
+        try {
+            const payload = {
+                nom: completeData.lastName,
+                prenom: completeData.firstName,
+                nationalites: completeData.nationality,
+                date_naissance: completeData.birthDate,
+                pied_fort: completeData.strongFoot,
+                taille_cm: parseInt(completeData.height || "0"),
+                couleur_cv: completeData.cvColor,
+                poste_principal: completeData.primaryPosition,
+                poste_secondaire: completeData.secondaryPosition || null,
+                url_transfermarkt: completeData.statsLink || null,
+                photo_joueur: completeData.photoUrl || "",
+                vma: completeData.vma ? parseFloat(completeData.vma.replace(',', '.')) : null,
+                envergure: completeData.envergure ? parseFloat(completeData.envergure) : null,
+                email: completeData.email,
+                telephone: completeData.phone,
+                email_agent_sportif: null,
+                telephone_agent_sportif: null,
+                qualites: completeData.qualites,
+                status: "À traiter",
+
+                // MAPPING INTELLIGENT
+                saisons: formData.career?.map((c, index) => ({
+                    club: c.club,
+                    // On combine l'année dans la catégorie pour ne pas perdre l'info car pas de colonne 'annee' en BDD
+                    categorie: c.year ? `${c.category || 'Séniors'} (${c.year})` : (c.category || "Séniors"),
+                    division: c.division && DIVISIONS.includes(c.division) ? c.division : "Autre",
+                    logo_club: "/logos/default-club.png",
+                    logo_division: "/logos/default-division.png",
+                    badge_capitanat: false,
+                    badge_surclasse: false,
+                    badge_champion: false,
+                    badge_coupe_remportee: false,
+                    matchs: index === 0 ? null : 0, // Matchs null pour saison actuelle (assumée index 0)
+                    buts: 0,
+                    passes_decisives: 0,
+                    temps_jeu_moyen: null,
+                    saison_actuelle: index === 0, // La première ligne est considérée comme actuelle
+                    ordre: index
+                })) || []
+            };
+
+            // Validation DEBUG CLIENT - Vérifie ce qui manque avant l'envoi
+            const missingFields = [];
+            if (!payload.nom) missingFields.push("Nom");
+            if (!payload.prenom) missingFields.push("Prénom");
+            if (!payload.nationalites) missingFields.push("Nationalité");
+            if (!payload.date_naissance) missingFields.push("Date de naissance");
+            if (!payload.pied_fort) missingFields.push("Pied fort");
+            if (!payload.taille_cm) missingFields.push("Taille");
+            if (!payload.poste_principal) missingFields.push("Poste principal");
+            if (!payload.photo_joueur) missingFields.push("Photo du joueur");
+            if (!payload.email) missingFields.push("Email");
+            if (!payload.telephone) missingFields.push("Téléphone");
+
+            if (missingFields.length > 0) {
+                alert(`Il manque des informations obligatoires (étape 1 ou 2) : \n- ${missingFields.join("\n- ")}`);
+                setIsSubmitting(false);
+                return;
+            }
+
+            const response = await fetch('/api/formulaires-joueur', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Erreur inconnue");
+            }
+
+            setStep(4);
+
+        } catch (error: any) {
+            alert("Erreur lors de la sauvegarde : " + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const toggleQuality = (q: string) => {
@@ -129,7 +220,12 @@ export function SkillsStep() {
                                 <input {...form.register(`career.${index}.category` as const)} placeholder="Catégorie (U19...)" className="input-field" />
                             </div>
                             <div className="md:col-span-2">
-                                <input {...form.register(`career.${index}.division` as const)} placeholder="Division" className="input-field" />
+                                <select {...form.register(`career.${index}.division` as const)} className="input-field appearance-none">
+                                    <option value="">Div...</option>
+                                    {DIVISIONS.map(d => (
+                                        <option key={d} value={d} className="bg-scout-card">{d}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="md:col-span-1 flex justify-center items-center">
                                 {fields.length > 1 && (
@@ -154,12 +250,16 @@ export function SkillsStep() {
                 </button>
                 <button
                     type="submit"
-                    className="bg-scout-orange hover:bg-orange-600 text-black font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-transform hover:scale-105 shadow-lg shadow-orange-900/20"
+                    disabled={isSubmitting}
+                    className="bg-scout-orange hover:bg-orange-600 text-black font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-transform hover:scale-105 shadow-lg shadow-orange-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Terminer
+                    {isSubmitting ? "Envoi..." : "Terminer"}
                     <Check className="w-5 h-5" />
                 </button>
             </div>
         </form>
     );
 }
+
+// Add missing React import if needed locally, though next.js handles it often, better safe
+import React from 'react';

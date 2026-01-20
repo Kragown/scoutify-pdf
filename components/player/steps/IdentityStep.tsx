@@ -81,7 +81,14 @@ export function IdentityStep() {
                         <input type="date" {...form.register("birthDate")} className="input-field" />
                     </InputGroup>
                     <InputGroup label="Nationalité(s)" error={form.formState.errors.nationality?.message}>
-                        <input {...form.register("nationality")} className="input-field" placeholder="Française" />
+                        <input
+                            {...form.register("nationality")}
+                            className="input-field"
+                            placeholder="Française"
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.replace(/[0-9]/g, '');
+                            }}
+                        />
                     </InputGroup>
                 </div>
 
@@ -122,7 +129,15 @@ export function IdentityStep() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <InputGroup label="Taille (cm)" error={form.formState.errors.height?.message}>
-                        <input type="number" {...form.register("height")} className="input-field" placeholder="185" />
+                        <input
+                            type="number"
+                            {...form.register("height")}
+                            className="input-field"
+                            placeholder="185"
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.slice(0, 3);
+                            }}
+                        />
                     </InputGroup>
                     <InputGroup label="Pied Fort" error={form.formState.errors.strongFoot?.message}>
                         <select {...form.register("strongFoot")} className="input-field">
@@ -136,10 +151,24 @@ export function IdentityStep() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <InputGroup label="VMA (Optionnel)" error={form.formState.errors.vma?.message}>
-                        <input {...form.register("vma")} className="input-field" placeholder="ex: 18.5" />
+                        <input
+                            {...form.register("vma")}
+                            className="input-field"
+                            placeholder="ex: 18.5"
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.,]/g, '');
+                            }}
+                        />
                     </InputGroup>
                     <InputGroup label="Envergure (Gardien)" error={form.formState.errors.envergure?.message}>
-                        <input {...form.register("envergure")} className="input-field" placeholder="ex: 190" />
+                        <input
+                            {...form.register("envergure")}
+                            className="input-field"
+                            placeholder="ex: 190"
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                            }}
+                        />
                     </InputGroup>
                 </div>
             </div>
@@ -156,7 +185,15 @@ export function IdentityStep() {
                         <input type="email" {...form.register("email")} className="input-field" placeholder="contact@example.com" />
                     </InputGroup>
                     <InputGroup label="Téléphone" error={form.formState.errors.phone?.message}>
-                        <input type="tel" {...form.register("phone")} className="input-field" placeholder="06 12 34 56 78" />
+                        <input
+                            type="tel"
+                            {...form.register("phone")}
+                            className="input-field"
+                            placeholder="06 12 34 56 78"
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\s-]/g, '');
+                            }}
+                        />
                     </InputGroup>
                     <InputGroup label="Lien Stats (Transfermarkt...)" error={form.formState.errors.statsLink?.message}>
                         <input {...form.register("statsLink")} className="input-field" placeholder="https://..." />
@@ -174,8 +211,12 @@ export function IdentityStep() {
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                        const url = URL.createObjectURL(file);
-                                        form.setValue("photoUrl", url);
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            const base64String = reader.result as string;
+                                            form.setValue("photoUrl", base64String);
+                                        };
+                                        reader.readAsDataURL(file);
                                     }
                                 }}
                                 className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600"
