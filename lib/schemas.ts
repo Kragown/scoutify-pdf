@@ -71,14 +71,40 @@ export const saisonSchema = z.object({
 
 export const saisonsSchema = z.array(saisonSchema).min(1, "Au moins une saison est requise");
 
-// Full Player Store Schema (Simplified)
+export const formationSchema = z.object({
+    annee_ou_periode: z.string().min(1, "L'année ou période est requise"),
+    titre_structure: z.string()
+        .min(1, "Le titre ou structure est requis")
+        .max(1000, "Le titre ou structure ne peut pas dépasser 1000 caractères"),
+    details: z.string()
+        .max(1000, "Les détails ne peuvent pas dépasser 1000 caractères")
+        .nullable()
+        .optional(),
+    ordre: z.number().int().min(0).default(0),
+});
+
+export const formationsSchema = z.array(formationSchema).min(1, "Au moins une formation est requise");
+
+export const interetSchema = z.object({
+    club: z.string().min(1, "Le nom du club est requis"),
+    annee: z.string().min(1, "L'année est requise"),
+    logo_club: z.string().min(1, "Le logo du club est obligatoire"),
+    ordre: z.number().int().min(0).default(0),
+});
+
+export const interetsSchema = z.array(interetSchema).min(1, "Au moins un intérêt est requis");
+
 export const fullPlayerSchema = identitySchema
     .merge(linksSchema)
     .extend({
-        photoUrl: z.string().optional(), // Local preview URL
-        qualites: qualitesSchema.optional(), // Qualités sportives (1 à 6)
-        saisons: saisonsSchema.optional(), // Saisons (1 à plusieurs)
+        photoUrl: z.string().optional(),
+        qualites: qualitesSchema.optional(),
+        saisons: saisonsSchema.optional(),
+        formations: formationsSchema.optional(),
+        interets: interetsSchema.optional(),
     });
 
 export type PlayerData = z.infer<typeof fullPlayerSchema>;
 export type SaisonData = z.infer<typeof saisonSchema>;
+export type FormationData = z.infer<typeof formationSchema>;
+export type InteretData = z.infer<typeof interetSchema>;

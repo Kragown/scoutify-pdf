@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { CreateFormulaireJoueurDto, CreateSaisonDto, DIVISIONS } from '@/lib/types';
+import { CreateFormulaireJoueurDto, CreateSaisonDto, CreateFormationDto, CreateInteretDto, DIVISIONS } from '@/lib/types';
 
 export const runtime = 'nodejs';
 
@@ -40,10 +40,14 @@ export async function GET(
         badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
         saison_actuelle: Boolean(saison.saison_actuelle),
       }));
+    const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+      .all(formulaireId);
+    const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+      .all(formulaireId);
 
     return NextResponse.json({
       success: true,
-      data: { ...formulaire, qualites, saisons }
+      data: { ...formulaire, qualites, saisons, formations, interets }
     });
 
   } catch (error) {
@@ -259,6 +263,104 @@ export async function PUT(
       }
     }
 
+    if (body.formations !== undefined) {
+      if (!Array.isArray(body.formations)) {
+        return NextResponse.json(
+          { success: false, error: 'Les formations doivent être un tableau' },
+          { status: 400 }
+        );
+      }
+      
+      if (body.formations.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Au moins une formation est requise' },
+          { status: 400 }
+        );
+      }
+      
+      for (let i = 0; i < body.formations.length; i++) {
+        const formation = body.formations[i];
+        
+        if (!formation.annee_ou_periode || typeof formation.annee_ou_periode !== 'string' || formation.annee_ou_periode.trim().length === 0) {
+          return NextResponse.json(
+            { success: false, error: `La formation ${i + 1}: l'année ou période est requise` },
+            { status: 400 }
+          );
+        }
+        
+        if (!formation.titre_structure || typeof formation.titre_structure !== 'string' || formation.titre_structure.trim().length === 0) {
+          return NextResponse.json(
+            { success: false, error: `La formation ${i + 1}: le titre ou structure est requis` },
+            { status: 400 }
+          );
+        }
+        
+        if (formation.titre_structure.length > 1000) {
+          return NextResponse.json(
+            { success: false, error: `La formation ${i + 1}: le titre ou structure ne peut pas dépasser 1000 caractères` },
+            { status: 400 }
+          );
+        }
+        
+        if (formation.details !== null && formation.details !== undefined) {
+          if (typeof formation.details !== 'string') {
+            return NextResponse.json(
+              { success: false, error: `La formation ${i + 1}: les détails doivent être une chaîne de caractères` },
+              { status: 400 }
+            );
+          }
+          
+          if (formation.details.length > 1000) {
+            return NextResponse.json(
+              { success: false, error: `La formation ${i + 1}: les détails ne peuvent pas dépasser 1000 caractères` },
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
+
+    if (body.interets !== undefined) {
+      if (!Array.isArray(body.interets)) {
+        return NextResponse.json(
+          { success: false, error: 'Les intérêts doivent être un tableau' },
+          { status: 400 }
+        );
+      }
+      
+      if (body.interets.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Au moins un intérêt est requis' },
+          { status: 400 }
+        );
+      }
+      
+      for (let i = 0; i < body.interets.length; i++) {
+        const interet = body.interets[i];
+        
+        if (!interet.club || typeof interet.club !== 'string' || interet.club.trim().length === 0) {
+          return NextResponse.json(
+            { success: false, error: `L'intérêt ${i + 1}: le nom du club est requis` },
+            { status: 400 }
+          );
+        }
+        
+        if (!interet.annee || typeof interet.annee !== 'string' || interet.annee.trim().length === 0) {
+          return NextResponse.json(
+            { success: false, error: `L'intérêt ${i + 1}: l'année est requise` },
+            { status: 400 }
+          );
+        }
+        
+        if (!interet.logo_club || typeof interet.logo_club !== 'string' || interet.logo_club.trim().length === 0) {
+          return NextResponse.json(
+            { success: false, error: `L'intérêt ${i + 1}: le logo du club est obligatoire` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const updates: string[] = [];
     const values: any[] = [];
 
@@ -391,6 +493,50 @@ export async function PUT(
         }
       }
 
+      if (body.formations !== undefined) {
+        db.prepare('DELETE FROM formations WHERE formulaire_joueur_id = ?').run(formulaireId);
+        
+        if (body.formations.length > 0) {
+          const insertFormation = db.prepare(`
+            INSERT INTO formations (
+              formulaire_joueur_id, annee_ou_periode, titre_structure, details, ordre
+            ) VALUES (?, ?, ?, ?, ?)
+          `);
+
+          body.formations.forEach((formation: CreateFormationDto, index: number) => {
+            insertFormation.run(
+              formulaireId,
+              formation.annee_ou_periode.trim(),
+              formation.titre_structure.trim(),
+              formation.details?.trim() || null,
+              formation.ordre ?? index
+            );
+          });
+        }
+      }
+
+      if (body.interets !== undefined) {
+        db.prepare('DELETE FROM interets WHERE formulaire_joueur_id = ?').run(formulaireId);
+        
+        if (body.interets.length > 0) {
+          const insertInteret = db.prepare(`
+            INSERT INTO interets (
+              formulaire_joueur_id, club, annee, logo_club, ordre
+            ) VALUES (?, ?, ?, ?, ?)
+          `);
+
+          body.interets.forEach((interet: CreateInteretDto, index: number) => {
+            insertInteret.run(
+              formulaireId,
+              interet.club.trim(),
+              interet.annee.trim(),
+              interet.logo_club,
+              interet.ordre ?? index
+            );
+          });
+        }
+      }
+
       const updatedFormulaire = db.prepare('SELECT * FROM formulaires_joueur WHERE id = ?').get(formulaireId);
       const qualites = db.prepare('SELECT * FROM qualites WHERE formulaire_joueur_id = ? ORDER BY ordre')
         .all(formulaireId);
@@ -404,15 +550,19 @@ export async function PUT(
           badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
           saison_actuelle: Boolean(saison.saison_actuelle),
         }));
+      const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+        .all(formulaireId);
+      const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+        .all(formulaireId);
 
       if (!updatedFormulaire || typeof updatedFormulaire !== 'object') {
         throw new Error('Formulaire non trouvé après mise à jour');
       }
 
-      return { ...(updatedFormulaire as Record<string, any>), qualites, saisons };
+      return { ...(updatedFormulaire as Record<string, any>), qualites, saisons, formations, interets };
     });
 
-    if (updates.length === 0 && body.qualites === undefined && body.saisons === undefined) {
+    if (updates.length === 0 && body.qualites === undefined && body.saisons === undefined && body.formations === undefined && body.interets === undefined) {
       return NextResponse.json(
         { success: false, error: 'Aucun champ à mettre à jour' },
         { status: 400 }

@@ -1,8 +1,8 @@
 export interface Qualite {
   id?: number;
   formulaire_joueur_id: number;
-  libelle: string; // Maximum 24 caractères
-  ordre: number; // Ordre d'affichage
+  libelle: string;
+  ordre: number;
   created_at?: string;
 }
 
@@ -10,8 +10,8 @@ export interface FormulaireJoueur {
   id?: number;
   nom: string;
   prenom: string;
-  nationalites: string; // JSON string ou texte séparé par virgules
-  date_naissance: string; // Format YYYY-MM-DD
+  nationalites: string;
+  date_naissance: string;
   pied_fort: 'Droit' | 'Gauche' | 'Ambidextre';
   taille_cm: number;
   couleur_cv: string;
@@ -21,14 +21,16 @@ export interface FormulaireJoueur {
   photo_joueur: string;
   vma?: number | null;
   envergure?: number | null;
-  email: string; // Obligatoire
-  telephone: string; // Obligatoire, format international
-  email_agent_sportif?: string | null; // Optionnel
-  telephone_agent_sportif?: string | null; // Optionnel, format international
+  email: string;
+  telephone: string; // format international
+  email_agent_sportif?: string | null;
+  telephone_agent_sportif?: string | null; // format international
   created_at?: string;
   updated_at?: string;
   qualites?: Qualite[]; // Qualités associées (optionnel, chargé séparément)
   saisons?: Saison[]; // Saisons associées (optionnel, chargé séparément)
+  formations?: Formation[]; // Formations associées (optionnel, chargé séparément)
+  interets?: Interet[]; // Intérêts associés (optionnel, chargé séparément)
 }
 
 export interface CreateFormulaireJoueurDto {
@@ -45,15 +47,16 @@ export interface CreateFormulaireJoueurDto {
   photo_joueur: string;
   vma?: number | null;
   envergure?: number | null;
-  email: string; // Obligatoire
-  telephone: string; // Obligatoire, format international
-  email_agent_sportif?: string | null; // Optionnel
-  telephone_agent_sportif?: string | null; // Optionnel, format international
+  email: string;
+  telephone: string; // format international
+  email_agent_sportif?: string | null;
+  telephone_agent_sportif?: string | null; // format international
   qualites?: string[]; // Array de qualités (1 à 6, max 24 caractères chacune)
   saisons?: CreateSaisonDto[]; // Array de saisons (1 à plusieurs)
+  formations?: CreateFormationDto[]; // Array de formations (1 à plusieurs)
+  interets?: CreateInteretDto[]; // Array d'intérêts (1 à plusieurs)
 }
 
-// Liste des divisions disponibles
 export const DIVISIONS = [
   'Ligue 1',
   'Ligue 2',
@@ -75,7 +78,7 @@ export interface Saison {
   id?: number;
   formulaire_joueur_id: number;
   club: string;
-  categorie: string; // Ex: U17, U19, Séniors...
+  categorie: string;
   division: Division;
   logo_club: string; // Chemin vers l'image, obligatoire (staff uniquement)
   logo_division: string; // Chemin vers l'image, obligatoire (staff uniquement)
@@ -83,12 +86,12 @@ export interface Saison {
   badge_surclasse: boolean;
   badge_champion: boolean;
   badge_coupe_remportee: boolean;
-  matchs?: number | null; // Obligatoire sauf saison actuelle
-  buts?: number | null; // Facultatif
-  passes_decisives?: number | null; // Facultatif
-  temps_jeu_moyen?: number | null; // 1 à 90 minutes, facultatif
+  matchs?: number | null;
+  buts?: number | null;
+  passes_decisives?: number | null;
+  temps_jeu_moyen?: number | null;
   saison_actuelle: boolean; // Pour savoir si c'est la saison en cours
-  ordre: number; // Ordre d'affichage
+  ordre: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -108,6 +111,42 @@ export interface CreateSaisonDto {
   passes_decisives?: number | null;
   temps_jeu_moyen?: number | null; // 1 à 90
   saison_actuelle?: boolean;
+  ordre?: number;
+}
+
+export interface Formation {
+  id?: number;
+  formulaire_joueur_id: number;
+  annee_ou_periode: string;
+  titre_structure: string;
+  details?: string | null;
+  ordre: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateFormationDto {
+  annee_ou_periode: string;
+  titre_structure: string;
+  details?: string | null;
+  ordre?: number;
+}
+
+export interface Interet {
+  id?: number;
+  formulaire_joueur_id: number;
+  club: string;
+  annee: string;
+  logo_club: string; // Chemin vers l'image, obligatoire (staff uniquement)
+  ordre: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateInteretDto {
+  club: string;
+  annee: string;
+  logo_club: string; // Chemin vers l'image, obligatoire (staff uniquement)
   ordre?: number;
 }
 
