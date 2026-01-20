@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, Plus, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, Plus, X, Calendar } from "lucide-react";
 import { FormulaireJoueur, POSTES } from "@/lib/types";
 
 export default function EditFormulairePage() {
@@ -12,6 +12,10 @@ export default function EditFormulairePage() {
 
   const [formulaire, setFormulaire] = useState<FormulaireJoueur | null>(null);
   const [qualites, setQualites] = useState<string[]>([]);
+  const [nationalites, setNationalites] = useState<string[]>([]);
+  const [newNationalite, setNewNationalite] = useState("");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +29,24 @@ export default function EditFormulairePage() {
 
         if (data.success) {
           setFormulaire(data.data);
-          // Initialiser les qualités depuis le formulaire
           const qualitesArray = data.data.qualites?.map((q: any) => q.libelle) || [];
           setQualites(qualitesArray);
+          let nationalitesArray: string[] = [];
+          if (data.data.nationalites) {
+            try {
+              nationalitesArray = typeof data.data.nationalites === 'string' 
+                ? JSON.parse(data.data.nationalites) 
+                : Array.isArray(data.data.nationalites)
+                ? data.data.nationalites
+                : [data.data.nationalites];
+            } catch {
+              nationalitesArray = [data.data.nationalites];
+            }
+          }
+          setNationalites(nationalitesArray.filter(Boolean));
+          if (data.data.photo_joueur) {
+            setPhotoPreview(data.data.photo_joueur);
+          }
         } else {
           setError(data.error || "Erreur lors du chargement du formulaire");
         }
@@ -48,7 +67,16 @@ export default function EditFormulairePage() {
     e.preventDefault();
     if (!formulaire) return;
 
-    // Validation des qualités
+    if (nationalites.length === 0) {
+      setError("Au moins une nationalité est requise");
+      return;
+    }
+
+    if (!formulaire.photo_joueur || formulaire.photo_joueur.trim() === "") {
+      setError("Une photo de joueur est requise");
+      return;
+    }
+
     const validQualites = qualites.filter((q) => q.trim().length > 0);
     if (validQualites.length === 0) {
       setError("Au moins une qualité est requise");
@@ -78,7 +106,7 @@ export default function EditFormulairePage() {
         body: JSON.stringify({
           nom: formulaire.nom,
           prenom: formulaire.prenom,
-          nationalites: formulaire.nationalites,
+          nationalites: nationalites.length > 0 ? nationalites : [""],
           date_naissance: formulaire.date_naissance,
           pied_fort: formulaire.pied_fort,
           taille_cm: formulaire.taille_cm,
@@ -147,6 +175,153 @@ export default function EditFormulairePage() {
     newQualites[index] = value;
     setQualites(newQualites);
     setError(null);
+  };
+
+  const addNationalite = () => {
+    const trimmed = newNationalite.trim();
+    if (!trimmed) return;
+    if (nationalites.includes(trimmed)) {
+      setError("Cette nationalité est déjà ajoutée");
+      return;
+    }
+    setNationalites([...nationalites, trimmed]);
+    setNewNationalite("");
+    setError(null);
+  };
+
+  const removeNationalite = (nationalite: string) => {
+    setNationalites(nationalites.filter((n) => n !== nationalite));
+  };
+
+  const handleNationaliteKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addNationalite();
+    }
+  };
+
+  const cropImageToPortrait = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Impossible de créer le contexte canvas'));
+            return;
+          }
+
+          // Dimensions cibles en format portrait (ratio 3:4)
+          const targetWidth = 600;
+          const targetHeight = 800;
+          
+          // Calculer les dimensions pour recadrer au centre
+          let sourceX = 0;
+          let sourceY = 0;
+          let sourceWidth = img.width;
+          let sourceHeight = img.height;
+          
+          // Calculer le ratio pour remplir le format portrait
+          const imageRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+          
+          if (imageRatio > targetRatio) {
+            // L'image est plus large, on recadre les côtés
+            sourceWidth = img.height * targetRatio;
+            sourceX = (img.width - sourceWidth) / 2;
+          } else {
+            // L'image est plus haute, on recadre le haut/bas
+            sourceHeight = img.width / targetRatio;
+            sourceY = (img.height - sourceHeight) / 2;
+          }
+          
+          // Configurer le canvas
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          
+          // Dessiner l'image recadrée
+          ctx.drawImage(
+            img,
+            sourceX, sourceY, sourceWidth, sourceHeight,
+            0, 0, targetWidth, targetHeight
+          );
+          
+          // Convertir en blob puis en File
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Erreur lors de la conversion'));
+              return;
+            }
+            const croppedFile = new File([blob], file.name, { type: file.type });
+            resolve(croppedFile);
+          }, file.type, 0.9);
+        };
+        img.onerror = () => reject(new Error('Erreur lors du chargement de l\'image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Erreur lors de la lecture du fichier'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError("Le fichier doit être une image");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("L'image ne doit pas dépasser 5MB");
+        return;
+      }
+
+      setUploadingPhoto(true);
+      try {
+        const croppedFile = await cropImageToPortrait(file);
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          setPhotoPreview(result);
+        };
+        reader.readAsDataURL(croppedFile);
+
+        const formData = new FormData();
+        formData.append('file', croppedFile);
+        formData.append('type', 'photo');
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          handleChange("photo_joueur", data.path);
+          setPhotoPreview(data.path);
+          setError(null);
+        } else {
+          setError(data.error || "Erreur lors de l'upload de l'image");
+          setPhotoPreview(null);
+        }
+      } catch (err) {
+        setError("Erreur lors du recadrage ou de l'upload de l'image");
+        setPhotoPreview(null);
+        console.error(err);
+      } finally {
+        setUploadingPhoto(false);
+      }
+    }
+  };
+
+  const handlePhotoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    handleChange("photo_joueur", url);
+    setPhotoPreview(url || null);
   };
 
   if (loading) {
@@ -274,18 +449,56 @@ export default function EditFormulairePage() {
                     className="input-field"
                   />
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
                     Nationalités *
                   </label>
-                  <input
-                    type="text"
-                    value={formulaire.nationalites || ""}
-                    onChange={(e) => handleChange("nationalites", e.target.value)}
-                    required
-                    className="input-field"
-                    placeholder="Ex: France, Espagne"
-                  />
+                  <div className="space-y-3">
+                    {/* Tags des nationalités */}
+                    {nationalites.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {nationalites.map((nationalite, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-2 bg-scout-orange/20 text-scout-orange border border-scout-orange/50 rounded-full px-3 py-1 text-sm font-bold"
+                          >
+                            {nationalite}
+                            <button
+                              type="button"
+                              onClick={() => removeNationalite(nationalite)}
+                              className="hover:text-red-400 transition-colors"
+                              title="Supprimer cette nationalité"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Input pour ajouter une nationalité */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newNationalite}
+                        onChange={(e) => setNewNationalite(e.target.value)}
+                        onKeyPress={handleNationaliteKeyPress}
+                        placeholder="Ajouter une nationalité (Appuyez sur Entrée)"
+                        className="input-field flex-1"
+                      />
+                      <button
+                        type="button"
+                        onClick={addNationalite}
+                        disabled={!newNationalite.trim()}
+                        className="bg-scout-orange hover:bg-orange-600 text-black font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Ajouter
+                      </button>
+                    </div>
+                    {nationalites.length === 0 && (
+                      <p className="text-white/40 text-sm italic">Aucune nationalité. Ajoutez-en au moins une.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -470,18 +683,70 @@ export default function EditFormulairePage() {
                     placeholder="https://www.transfermarkt.fr/..."
                   />
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
                     Photo Joueur *
                   </label>
-                  <input
-                    type="text"
-                    value={formulaire.photo_joueur || ""}
-                    onChange={(e) => handleChange("photo_joueur", e.target.value)}
-                    required
-                    className="input-field"
-                    placeholder="/photos/joueur.jpg"
-                  />
+                  <div className="space-y-4">
+                    {/* Prévisualisation */}
+                    {photoPreview && (
+                      <div className="relative w-full max-w-xs mx-auto" style={{ aspectRatio: '3/4' }}>
+                        <img
+                          src={photoPreview}
+                          alt="Photo du joueur"
+                          className="w-full h-full object-cover rounded-lg border border-white/10"
+                          onError={() => setPhotoPreview(null)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPhotoPreview(null);
+                            handleChange("photo_joueur", "");
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                          title="Supprimer la photo"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Upload de fichier */}
+                    <div>
+                      <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                        Télécharger une image
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          disabled={uploadingPhoto}
+                          className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600 file:cursor-pointer file:transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                        {uploadingPhoto && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="w-5 h-5 text-scout-orange animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-white/40 text-xs mt-1">Formats acceptés: JPG, PNG, GIF • Max 5MB</p>
+                    </div>
+
+                    {/* Ou URL */}
+                    <div>
+                      <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                        Ou entrer une URL ou un chemin
+                      </label>
+                      <input
+                        type="text"
+                        value={formulaire.photo_joueur?.startsWith('data:') ? '' : (formulaire.photo_joueur || '')}
+                        onChange={handlePhotoUrlChange}
+                        className="input-field"
+                        placeholder="https://example.com/photo.jpg ou /photos/joueur.jpg"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
