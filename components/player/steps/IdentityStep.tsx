@@ -2,15 +2,15 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { identitySchema, linksSchema } from "@/lib/schemas";
+import { identitySchema, linksSchema, physicalSchema } from "@/lib/schemas";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { ArrowRight, Check } from "lucide-react";
 import { z } from "zod";
 import { clsx } from "clsx";
 
-// Combine schemas for this specific step (Identity + Links + Photo)
-// Removed Physical schema as requested
+// Combine schemas for this specific step (Identity + Physical + Links + Photo)
 const step1Schema = identitySchema
+    .merge(physicalSchema)
     .merge(linksSchema)
     .extend({
         photoUrl: z.string().optional(),
@@ -35,6 +35,12 @@ export function IdentityStep() {
             phone: data.phone || "",
             birthDate: data.birthDate || "",
             cvColor: (data.cvColor as any) || "#1E5EFF",
+
+            // Physical
+            height: data.height || "",
+            strongFoot: (data.strongFoot as any) || undefined,
+            vma: data.vma || "",
+            envergure: data.envergure || "",
 
             // Links & Media
             statsLink: data.statsLink || "",
@@ -107,7 +113,40 @@ export function IdentityStep() {
 
             <div className="border-t border-white/10" />
 
-            {/* SECTION 2: CONTACT & LIENS */}
+            {/* SECTION 2: PHYSIQUE */}
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <h2 className="text-2xl font-bold text-white">Physique</h2>
+                    <p className="text-sm text-scout-muted">Vos aptitudes physiques.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <InputGroup label="Taille (cm)" error={form.formState.errors.height?.message}>
+                        <input type="number" {...form.register("height")} className="input-field" placeholder="185" />
+                    </InputGroup>
+                    <InputGroup label="Pied Fort" error={form.formState.errors.strongFoot?.message}>
+                        <select {...form.register("strongFoot")} className="input-field">
+                            <option value="">Sélectionner</option>
+                            <option value="Droit">Droit</option>
+                            <option value="Gauche">Gauche</option>
+                            <option value="Ambidextre">Ambidextre</option>
+                        </select>
+                    </InputGroup>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <InputGroup label="VMA (Optionnel)" error={form.formState.errors.vma?.message}>
+                        <input {...form.register("vma")} className="input-field" placeholder="ex: 18.5" />
+                    </InputGroup>
+                    <InputGroup label="Envergure (Gardien)" error={form.formState.errors.envergure?.message}>
+                        <input {...form.register("envergure")} className="input-field" placeholder="ex: 190" />
+                    </InputGroup>
+                </div>
+            </div>
+
+            <div className="border-t border-white/10" />
+
+            {/* SECTION 3: CONTACT & LIENS */}
             <div className="space-y-6">
                 <div className="space-y-2">
                     <h2 className="text-2xl font-bold text-white">Contact & Liens</h2>
@@ -151,8 +190,8 @@ export function IdentityStep() {
                     type="submit"
                     className="bg-scout-orange hover:bg-orange-600 text-black font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-transform hover:scale-105"
                 >
-                    Terminer
-                    <Check className="w-5 h-5" />
+                    Suivant
+                    <ArrowRight className="w-5 h-5" />
                 </button>
             </div>
         </form>

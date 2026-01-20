@@ -1,6 +1,8 @@
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { IdentityStep } from "./steps/IdentityStep";
+import { PositionStep } from "./steps/PositionStep";
+import { SkillsStep } from "./steps/SkillsStep";
 
 export function PlayerWizard() {
     const { currentStep } = usePlayerStore();
@@ -16,8 +18,10 @@ export function PlayerWizard() {
                     transition={{ duration: 0.3 }}
                 >
                     {currentStep === 1 && <IdentityStep />}
+                    {currentStep === 2 && <PositionStep />}
+                    {currentStep === 3 && <SkillsStep />}
 
-                    {currentStep > 1 && (
+                    {currentStep > 3 && (
                         <div className="p-12 text-center border border-white/10 rounded-xl bg-scout-card space-y-4 animate-fade-in">
                             <div className="w-16 h-16 bg-scout-orange rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">

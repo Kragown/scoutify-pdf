@@ -13,13 +13,21 @@ export const identitySchema = z.object({
     cvColor: z.enum(["#1E5EFF", "#C46A4A", "#5B6B3A", "#0F2A43", "#D6C6A8", "#7A1E3A"]).default("#1E5EFF"),
 });
 
-// Links & Media Schema
-export const linksSchema = z.object({
-    statsLink: z.string().url("URL invalide").optional().or(z.literal("")),
-    videoLink: z.string().url("URL invalide").optional().or(z.literal("")),
+// Physical Schema
+export const physicalSchema = z.object({
+    height: z.string().min(2, "Taille requise (ex: 185)"),
+    strongFoot: z.enum(["Droit", "Gauche", "Ambidextre"], { message: "Sélectionnez un pied" }),
+    vma: z.string().optional(), // Can be string input, parsed later
+    envergure: z.string().optional(), // For GK
 });
 
-// Qualités sportives Schema
+// Position Schema
+export const positionSchema = z.object({
+    primaryPosition: z.string().min(2, "Sélectionnez un poste principal"),
+    secondaryPosition: z.string().optional(),
+});
+
+// Qualities Schema
 export const qualitesSchema = z.array(
     z.string()
         .min(1, "Une qualité ne peut pas être vide")
@@ -28,12 +36,29 @@ export const qualitesSchema = z.array(
     .min(1, "Au moins une qualité est requise")
     .max(6, "Maximum 6 qualités autorisées");
 
-// Full Player Store Schema (Simplified)
+// Career Step Schema (for SkillsStep)
+export const careerStepSchema = z.object({
+    year: z.string().min(4, "Année requise"),
+    club: z.string().min(2, "Club requis"),
+    category: z.string().optional(),
+    division: z.string().optional(),
+});
+
+// Links & Media Schema
+export const linksSchema = z.object({
+    statsLink: z.string().url("URL invalide").optional().or(z.literal("")),
+    videoLink: z.string().url("URL invalide").optional().or(z.literal("")),
+});
+
+// Full Player Store Schema
 export const fullPlayerSchema = identitySchema
+    .merge(physicalSchema)
+    .merge(positionSchema)
     .merge(linksSchema)
     .extend({
-        photoUrl: z.string().optional(), // Local preview URL
-        qualites: qualitesSchema.optional(), // Qualités sportives (1 à 6)
+        qualites: qualitesSchema.optional(),
+        photoUrl: z.string().optional(),
+        career: z.array(careerStepSchema).optional(),
     });
 
 export type PlayerData = z.infer<typeof fullPlayerSchema>;
