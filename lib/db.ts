@@ -92,6 +92,36 @@ try {
   }
 }
 
+try {
+  db.exec(`
+    ALTER TABLE saisons ADD COLUMN periode TEXT;
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne periode:', error.message);
+  }
+}
+
+try {
+  db.exec(`
+    ALTER TABLE saisons ADD COLUMN mi_saison INTEGER DEFAULT 0 CHECK(mi_saison IN (0, 1));
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne mi_saison:', error.message);
+  }
+}
+
+try {
+  db.exec(`
+    ALTER TABLE saisons ADD COLUMN periode_type TEXT CHECK(periode_type IN ('Hiver', 'Été'));
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne periode_type:', error.message);
+  }
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS qualites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

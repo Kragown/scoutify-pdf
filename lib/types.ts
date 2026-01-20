@@ -82,6 +82,9 @@ export interface Saison {
   club: string;
   categorie: string;
   division: Division;
+  periode?: string | null;
+  mi_saison?: boolean;
+  periode_type?: 'Hiver' | 'Été' | null;
   logo_club: string; // Chemin vers l'image, obligatoire (staff uniquement)
   logo_division: string; // Chemin vers l'image, obligatoire (staff uniquement)
   badge_capitanat: boolean;
@@ -102,6 +105,9 @@ export interface CreateSaisonDto {
   club: string;
   categorie: string;
   division: Division;
+  periode?: string | null;
+  mi_saison?: boolean;
+  periode_type?: 'Hiver' | 'Été' | null;
   logo_club: string;
   logo_division: string;
   badge_capitanat?: boolean;

@@ -19,6 +19,7 @@ export async function GET() {
           badge_surclasse: Boolean(saison.badge_surclasse),
           badge_champion: Boolean(saison.badge_champion),
           badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
+          mi_saison: Boolean(saison.mi_saison),
           saison_actuelle: Boolean(saison.saison_actuelle),
         }));
       const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
@@ -382,10 +383,10 @@ export async function POST(request: NextRequest) {
       if (body.saisons && body.saisons.length > 0) {
         const insertSaison = db.prepare(`
           INSERT INTO saisons (
-            formulaire_joueur_id, club, categorie, division, logo_club, logo_division,
+            formulaire_joueur_id, club, categorie, division, periode, mi_saison, periode_type, logo_club, logo_division,
             badge_capitanat, badge_surclasse, badge_champion, badge_coupe_remportee,
             matchs, buts, passes_decisives, temps_jeu_moyen, saison_actuelle, ordre
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
         body.saisons.forEach((saison: CreateSaisonDto, index: number) => {
@@ -394,6 +395,9 @@ export async function POST(request: NextRequest) {
             saison.club.trim(),
             saison.categorie.trim(),
             saison.division,
+            saison.periode || null,
+            saison.mi_saison ? 1 : 0,
+            saison.periode_type || null,
             saison.logo_club,
             saison.logo_division,
             saison.badge_capitanat ? 1 : 0,
@@ -456,6 +460,7 @@ export async function POST(request: NextRequest) {
           badge_surclasse: Boolean(saison.badge_surclasse),
           badge_champion: Boolean(saison.badge_champion),
           badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
+          mi_saison: Boolean(saison.mi_saison),
           saison_actuelle: Boolean(saison.saison_actuelle),
         }));
       const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
