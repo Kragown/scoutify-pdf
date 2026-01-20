@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, User, MapPin, Filter, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, Calendar, User, MapPin, Filter, ChevronDown, X, EllipsisVertical, Eye, Trash2 } from "lucide-react";
 import { FormulaireJoueur } from "@/lib/types";
 
 export default function StaffPage() {
@@ -12,6 +12,7 @@ export default function StaffPage() {
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<'À traiter' | 'Traité' | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [openActionsMenu, setOpenActionsMenu] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -242,8 +243,7 @@ export default function StaffPage() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-scout-card border border-white/10 rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
+                <div className="bg-scout-card border border-white/10 rounded-lg">
                     <table className="w-full">
                       <thead className="bg-black/30 border-b border-white/10">
                         <tr>
@@ -259,6 +259,7 @@ export default function StaffPage() {
                           <th className="text-left px-6 py-4 text-white/80 font-bold text-sm uppercase tracking-wide">
                             Statut
                           </th>
+                          <th className="text-right px-6 py-4"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -315,11 +316,69 @@ export default function StaffPage() {
                                 )}
                               </button>
                             </td>
+                            <td className="px-6 py-4">
+                              <div className="relative flex justify-end">
+                                <button
+                                  onClick={() => setOpenActionsMenu(openActionsMenu === formulaire.id ? null : formulaire.id!)}
+                                  className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                  title="Actions"
+                                >
+                                  <EllipsisVertical className="w-5 h-5" />
+                                </button>
+
+                                {openActionsMenu === formulaire.id && (
+                                  <>
+                                    <div
+                                      className="fixed inset-0 z-10"
+                                      onClick={() => setOpenActionsMenu(null)}
+                                    />
+                                    <div className="absolute right-0 mt-2 z-20 bg-scout-card border border-white/10 rounded-lg shadow-xl min-w-[180px] overflow-hidden">
+                                      <button
+                                        onClick={() => {
+                                          console.log("Voir détails:", formulaire.id);
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                                      >
+                                        <Eye className="w-4 h-4" />
+                                        Voir les détails
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (confirm(`Êtes-vous sûr de vouloir supprimer le formulaire de ${formulaire.prenom} ${formulaire.nom} ?`)) {
+                                            try {
+                                              const response = await fetch(`/api/formulaires-joueur/${formulaire.id}`, {
+                                                method: "DELETE",
+                                              });
+                                              const data = await response.json();
+                                              
+                                              if (data.success) {
+                                                setFormulaires((prev) => prev.filter((f) => f.id !== formulaire.id));
+                                                setOpenActionsMenu(null);
+                                              } else {
+                                                setError(data.error || "Erreur lors de la suppression");
+                                              }
+                                            } catch (err) {
+                                              setError("Erreur lors de la suppression");
+                                              console.error(err);
+                                            }
+                                          }
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2 border-t border-white/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                        Supprimer
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  </div>
                 </div>
               )}
             </div>
