@@ -25,6 +25,7 @@ export interface FormulaireJoueur {
   telephone: string; // format international
   email_agent_sportif?: string | null;
   telephone_agent_sportif?: string | null; // format international
+  status?: 'À traiter' | 'Traité';
   created_at?: string;
   updated_at?: string;
   qualites?: Qualite[]; // Qualités associées (optionnel, chargé séparément)

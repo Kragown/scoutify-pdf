@@ -82,7 +82,16 @@ try {
   }
 }
 
-// Créer la table qualites pour stocker les qualités sportives
+try {
+  db.exec(`
+    ALTER TABLE formulaires_joueur ADD COLUMN status TEXT DEFAULT 'À traiter' CHECK(status IN ('À traiter', 'Traité'));
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne status:', error.message);
+  }
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS qualites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,13 +103,11 @@ db.exec(`
   )
 `);
 
-// Créer un index pour améliorer les performances
 db.exec(`
   CREATE INDEX IF NOT EXISTS idx_qualites_formulaire_joueur_id 
   ON qualites(formulaire_joueur_id)
 `);
 
-// Créer la table saisons pour stocker les saisons de chaque joueur
 db.exec(`
   CREATE TABLE IF NOT EXISTS saisons (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,13 +133,11 @@ db.exec(`
   )
 `);
 
-// Créer un index pour améliorer les performances
 db.exec(`
   CREATE INDEX IF NOT EXISTS idx_saisons_formulaire_joueur_id 
   ON saisons(formulaire_joueur_id)
 `);
 
-// Créer un trigger pour mettre à jour updated_at
 db.exec(`
   CREATE TRIGGER IF NOT EXISTS update_saisons_timestamp 
   AFTER UPDATE ON saisons
@@ -141,7 +146,6 @@ db.exec(`
   END
 `);
 
-// Créer la table formations pour stocker les formations de chaque joueur
 db.exec(`
   CREATE TABLE IF NOT EXISTS formations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
