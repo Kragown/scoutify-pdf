@@ -15,8 +15,8 @@ export interface FormulaireJoueur {
   pied_fort: 'Droit' | 'Gauche' | 'Ambidextre';
   taille_cm: number;
   couleur_cv: string;
-  poste_principal: string;
-  poste_secondaire?: string | null;
+  poste_principal: Poste;
+  poste_secondaire?: Poste | null;
   url_transfermarkt?: string | null;
   photo_joueur: string;
   vma?: number | null;
@@ -26,6 +26,7 @@ export interface FormulaireJoueur {
   email_agent_sportif?: string | null;
   telephone_agent_sportif?: string | null; // format international
   status?: 'À traiter' | 'Traité';
+  archive?: boolean;
   created_at?: string;
   updated_at?: string;
   qualites?: Qualite[]; // Qualités associées (optionnel, chargé séparément)
@@ -42,8 +43,8 @@ export interface CreateFormulaireJoueurDto {
   pied_fort: 'Droit' | 'Gauche' | 'Ambidextre';
   taille_cm: number;
   couleur_cv: string;
-  poste_principal: string;
-  poste_secondaire?: string | null;
+  poste_principal: Poste;
+  poste_secondaire?: Poste | null;
   url_transfermarkt?: string | null;
   photo_joueur: string;
   vma?: number | null;
@@ -53,11 +54,29 @@ export interface CreateFormulaireJoueurDto {
   email_agent_sportif?: string | null;
   telephone_agent_sportif?: string | null; // format international
   status?: 'À traiter' | 'Traité';
+  archive?: boolean;
   qualites?: string[]; // Array de qualités (1 à 6, max 24 caractères chacune)
   saisons?: CreateSaisonDto[]; // Array de saisons (1 à plusieurs)
   formations?: CreateFormationDto[]; // Array de formations (1 à plusieurs)
   interets?: CreateInteretDto[]; // Array d'intérêts (1 à plusieurs)
 }
+
+export const POSTES = [
+  'GB',
+  'DG',
+  'DC',
+  'DD',
+  'MDC',
+  'MC',
+  'MOC',
+  'AG',
+  'AD',
+  'BU',
+  'Piston G',
+  'Piston D'
+] as const;
+
+export type Poste = typeof POSTES[number];
 
 export const DIVISIONS = [
   'Ligue 1',

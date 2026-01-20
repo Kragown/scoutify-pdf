@@ -435,13 +435,13 @@ export default function StaffPage() {
                                     <div className="absolute right-0 mt-2 z-20 bg-scout-card border border-white/10 rounded-lg shadow-xl min-w-[180px] overflow-hidden">
                                       <button
                                         onClick={() => {
-                                          console.log("Voir détails:", formulaire.id);
+                                          router.push(`/staff/${formulaire.id}/edit`);
                                           setOpenActionsMenu(null);
                                         }}
                                         className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                                       >
                                         <Eye className="w-4 h-4" />
-                                        Voir les détails
+                                        Editer
                                       </button>
                                       <button
                                         onClick={() => {

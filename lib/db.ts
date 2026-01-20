@@ -94,6 +94,16 @@ try {
 
 try {
   db.exec(`
+    ALTER TABLE formulaires_joueur ADD COLUMN archive INTEGER DEFAULT 0 CHECK(archive IN (0, 1));
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne archive:', error.message);
+  }
+}
+
+try {
+  db.exec(`
     ALTER TABLE saisons ADD COLUMN periode TEXT;
   `);
 } catch (error: any) {

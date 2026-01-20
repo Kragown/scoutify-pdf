@@ -26,7 +26,14 @@ export async function GET() {
         .all(formulaire.id);
       const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
         .all(formulaire.id);
-      return { ...(formulaire as Record<string, any>), qualites, saisons, formations, interets };
+      return { 
+        ...(formulaire as Record<string, any>), 
+        archive: Boolean(formulaire.archive),
+        qualites, 
+        saisons, 
+        formations, 
+        interets 
+      };
     });
     
     return NextResponse.json({
@@ -343,8 +350,8 @@ export async function POST(request: NextRequest) {
           nom, prenom, nationalites, date_naissance, pied_fort, 
           taille_cm, couleur_cv, poste_principal, poste_secondaire,
           url_transfermarkt, photo_joueur, vma, envergure,
-          email, telephone, email_agent_sportif, telephone_agent_sportif
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          email, telephone, email_agent_sportif, telephone_agent_sportif, archive
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const result = stmt.run(
@@ -364,7 +371,8 @@ export async function POST(request: NextRequest) {
         body.email,
         body.telephone,
         body.email_agent_sportif || null,
-        body.telephone_agent_sportif || null
+        body.telephone_agent_sportif || null,
+        body.archive ? 1 : 0
       );
 
       const formulaireId = result.lastInsertRowid;
@@ -472,7 +480,15 @@ export async function POST(request: NextRequest) {
         throw new Error('Formulaire non trouvé après création');
       }
 
-      return { ...(formulaire as Record<string, any>), qualites, saisons, formations, interets };
+      const formulaireData = formulaire as Record<string, any>;
+      return { 
+        ...formulaireData, 
+        archive: Boolean(formulaireData.archive),
+        qualites, 
+        saisons, 
+        formations, 
+        interets 
+      };
     });
 
     const formulaireAvecQualites = insertFormulaire();

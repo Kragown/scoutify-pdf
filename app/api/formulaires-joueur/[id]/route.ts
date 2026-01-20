@@ -46,9 +46,17 @@ export async function GET(
     const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
       .all(formulaireId);
 
+    const formulaireData = formulaire as Record<string, any>;
     return NextResponse.json({
       success: true,
-      data: { ...formulaire, qualites, saisons, formations, interets }
+      data: { 
+        ...formulaireData, 
+        archive: Boolean(formulaireData.archive),
+        qualites, 
+        saisons, 
+        formations, 
+        interets 
+      }
     });
 
   } catch (error) {
@@ -446,6 +454,10 @@ export async function PUT(
       updates.push('status = ?');
       values.push(body.status);
     }
+    if (body.archive !== undefined) {
+      updates.push('archive = ?');
+      values.push(body.archive ? 1 : 0);
+    }
 
     const updateFormulaire = db.transaction(() => {
       if (updates.length > 0) {
@@ -574,7 +586,15 @@ export async function PUT(
         throw new Error('Formulaire non trouvé après mise à jour');
       }
 
-      return { ...(updatedFormulaire as Record<string, any>), qualites, saisons, formations, interets };
+      const updatedFormulaireData = updatedFormulaire as Record<string, any>;
+      return { 
+        ...updatedFormulaireData, 
+        archive: Boolean(updatedFormulaireData.archive),
+        qualites, 
+        saisons, 
+        formations, 
+        interets 
+      };
     });
 
     if (updates.length === 0 && body.qualites === undefined && body.saisons === undefined && body.formations === undefined && body.interets === undefined) {
