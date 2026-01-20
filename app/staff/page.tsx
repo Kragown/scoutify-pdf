@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, User, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, User, MapPin, Filter, ChevronDown, X } from "lucide-react";
 import { FormulaireJoueur } from "@/lib/types";
 
 export default function StaffPage() {
@@ -10,6 +10,8 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'À traiter' | 'Traité' | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -38,11 +40,9 @@ export default function StaffPage() {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
+      day: "numeric",
+      month: "long",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -85,6 +85,15 @@ export default function StaffPage() {
     }
   };
 
+  const filteredFormulaires = statusFilter
+    ? formulaires.filter((f) => (f.status || "À traiter") === statusFilter)
+    : formulaires;
+
+  const getFilterLabel = () => {
+    if (statusFilter === null) return "Tous les statuts";
+    return statusFilter;
+  };
+
   return (
     <div className="min-h-screen bg-scout-dark font-sans">
       {/* Navbar */}
@@ -111,12 +120,96 @@ export default function StaffPage() {
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-2 uppercase">
-              Liste des Formulaires
-            </h1>
-            <p className="text-white/60 text-sm uppercase tracking-wide">
-              {formulaires.length} formulaire{formulaires.length > 1 ? "s" : ""} enregistré{formulaires.length > 1 ? "s" : ""}
-            </p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-2 uppercase">
+                  Liste des Formulaires
+                </h1>
+                <p className="text-white/60 text-sm uppercase tracking-wide">
+                  {filteredFormulaires.length} formulaire{filteredFormulaires.length > 1 ? "s" : ""} 
+                  {statusFilter && ` (${formulaires.length} au total)`}
+                </p>
+              </div>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className="bg-scout-card border border-white/10 hover:border-scout-orange/50 text-white font-bold text-sm py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2"
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>{getFilterLabel()}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isFilterOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsFilterOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 z-20 bg-scout-card border border-white/10 rounded-lg shadow-xl min-w-[200px] overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setStatusFilter(null);
+                          setIsFilterOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors ${
+                          statusFilter === null
+                            ? "bg-scout-orange/20 text-scout-orange"
+                            : "text-white hover:bg-white/5"
+                        }`}
+                      >
+                        Tous les statuts
+                      </button>
+                      <button
+                        onClick={() => {
+                          setStatusFilter("À traiter");
+                          setIsFilterOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors border-t border-white/10 ${
+                          statusFilter === "À traiter"
+                            ? "bg-scout-orange/20 text-scout-orange"
+                            : "text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-scout-orange"></span>
+                          À traiter
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setStatusFilter("Traité");
+                          setIsFilterOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors border-t border-white/10 ${
+                          statusFilter === "Traité"
+                            ? "bg-green-500/20 text-green-400"
+                            : "text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                          Traité
+                        </span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {statusFilter && (
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  onClick={() => setStatusFilter(null)}
+                  className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide hover:bg-blue-500/30 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  Filtrer par: {statusFilter}
+                </button>
+              </div>
+            )}
           </div>
 
           {loading && (
@@ -137,6 +230,16 @@ export default function StaffPage() {
               {formulaires.length === 0 ? (
                 <div className="bg-scout-card border border-white/10 rounded-lg p-12 text-center">
                   <p className="text-white/60 text-lg">Aucun formulaire enregistré</p>
+                </div>
+              ) : filteredFormulaires.length === 0 ? (
+                <div className="bg-scout-card border border-white/10 rounded-lg p-12 text-center">
+                  <p className="text-white/60 text-lg">Aucun formulaire avec le statut "{statusFilter}"</p>
+                  <button
+                    onClick={() => setStatusFilter(null)}
+                    className="mt-4 text-scout-orange hover:text-scout-orange/80 text-sm font-bold uppercase tracking-wide"
+                  >
+                    Réinitialiser le filtre
+                  </button>
                 </div>
               ) : (
                 <div className="bg-scout-card border border-white/10 rounded-lg overflow-hidden">
@@ -159,7 +262,7 @@ export default function StaffPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {formulaires.map((formulaire) => (
+                        {filteredFormulaires.map((formulaire) => (
                           <tr
                             key={formulaire.id}
                             className="border-b border-white/5 hover:bg-white/5 transition-colors"
@@ -175,7 +278,6 @@ export default function StaffPage() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-white/40" />
                                 <span className="text-white/80">
                                   {formulaire.poste_principal}
                                   {formulaire.poste_secondaire && (
