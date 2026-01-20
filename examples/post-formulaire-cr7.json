@@ -1,0 +1,114 @@
+{
+  "nom": "Ronaldo",
+  "prenom": "Cristiano",
+  "nationalites": ["Portugal"],
+  "date_naissance": "1985-02-05",
+  "pied_fort": "Droit",
+  "taille_cm": 187,
+  "couleur_cv": "#C46A4A",
+  "poste_principal": "Attaquant",
+  "poste_secondaire": "Ailier droit",
+  "url_transfermarkt": "https://www.transfermarkt.fr/cristiano-ronaldo/profil/spieler/8198",
+  "photo_joueur": "/photos/cr7.jpg",
+  "vma": 19.0,
+  "envergure": null,
+  "email": "cristiano.ronaldo@example.com",
+  "telephone": "+351912345678",
+  "email_agent_sportif": "mendes@example.com",
+  "telephone_agent_sportif": "+351987654321",
+  "qualites": [
+    "Finition",
+    "Vitesse",
+    "Tête",
+    "Leadership",
+    "Détermination",
+    "Physique"
+  ],
+  "saisons": [
+    {
+      "club": "Al-Nassr",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/al-nassr.png",
+      "logo_division": "/logos/saudi-pro-league.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": false,
+      "matchs": null,
+      "buts": null,
+      "passes_decisives": null,
+      "temps_jeu_moyen": null,
+      "saison_actuelle": true,
+      "ordre": 0
+    },
+    {
+      "club": "Manchester United",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/manchester-united.png",
+      "logo_division": "/logos/premier-league.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": false,
+      "matchs": 40,
+      "buts": 24,
+      "passes_decisives": 3,
+      "temps_jeu_moyen": 85,
+      "saison_actuelle": false,
+      "ordre": 1
+    },
+    {
+      "club": "Real Madrid",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/real-madrid.png",
+      "logo_division": "/logos/la-liga.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": true,
+      "matchs": 35,
+      "buts": 42,
+      "passes_decisives": 12,
+      "temps_jeu_moyen": 88,
+      "saison_actuelle": false,
+      "ordre": 2
+    }
+  ],
+  "formations": [
+    {
+      "annee_ou_periode": "1995-1997",
+      "titre_structure": "Andorinha",
+      "details": "Club de quartier à Funchal, débuts du football",
+      "ordre": 0
+    },
+    {
+      "annee_ou_periode": "1997-2002",
+      "titre_structure": "Sporting CP - Centre de Formation",
+      "details": "Formation complète, intégration en équipe première à 17 ans",
+      "ordre": 1
+    },
+    {
+      "annee_ou_periode": "2003",
+      "titre_structure": "Sélection Portugal U21",
+      "details": "Première sélection en équipe nationale",
+      "ordre": 2
+    }
+  ],
+  "interets": [
+    {
+      "club": "Real Madrid",
+      "annee": "2024",
+      "logo_club": "/logos/real-madrid.png",
+      "ordre": 0
+    },
+    {
+      "club": "Manchester United",
+      "annee": "2024",
+      "logo_club": "/logos/manchester-united.png",
+      "ordre": 1
+    }
+  ]
+}

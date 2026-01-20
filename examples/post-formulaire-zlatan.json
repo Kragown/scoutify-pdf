@@ -1,0 +1,131 @@
+{
+  "nom": "Ibrahimović",
+  "prenom": "Zlatan",
+  "nationalites": ["Suède", "Bosnie-Herzégovine"],
+  "date_naissance": "1981-10-03",
+  "pied_fort": "Droit",
+  "taille_cm": 195,
+  "couleur_cv": "#7A1E3A",
+  "poste_principal": "Attaquant",
+  "poste_secondaire": null,
+  "url_transfermarkt": "https://www.transfermarkt.fr/zlatan-ibrahimovic/profil/spieler/3455",
+  "photo_joueur": "/photos/zlatan.jpg",
+  "vma": 17.0,
+  "envergure": null,
+  "email": "zlatan.ibrahimovic@example.com",
+  "telephone": "+46701234567",
+  "email_agent_sportif": "mino@example.com",
+  "telephone_agent_sportif": "+46709876543",
+  "qualites": [
+    "Finition",
+    "Tête",
+    "Physique",
+    "Charisme",
+    "Expérience",
+    "Leadership"
+  ],
+  "saisons": [
+    {
+      "club": "AC Milan",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/ac-milan.png",
+      "logo_division": "/logos/serie-a.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": false,
+      "matchs": 27,
+      "buts": 8,
+      "passes_decisives": 3,
+      "temps_jeu_moyen": 75,
+      "saison_actuelle": false,
+      "ordre": 0
+    },
+    {
+      "club": "LA Galaxy",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/la-galaxy.png",
+      "logo_division": "/logos/mls.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": false,
+      "matchs": 31,
+      "buts": 31,
+      "passes_decisives": 8,
+      "temps_jeu_moyen": 88,
+      "saison_actuelle": false,
+      "ordre": 1
+    },
+    {
+      "club": "Manchester United",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/manchester-united.png",
+      "logo_division": "/logos/premier-league.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": true,
+      "matchs": 28,
+      "buts": 17,
+      "passes_decisives": 5,
+      "temps_jeu_moyen": 80,
+      "saison_actuelle": false,
+      "ordre": 2
+    },
+    {
+      "club": "Paris Saint-Germain",
+      "categorie": "Séniors",
+      "division": "Ligue 1",
+      "logo_club": "/logos/psg.png",
+      "logo_division": "/logos/ligue1.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": false,
+      "matchs": 33,
+      "buts": 30,
+      "passes_decisives": 10,
+      "temps_jeu_moyen": 85,
+      "saison_actuelle": false,
+      "ordre": 3
+    }
+  ],
+  "formations": [
+    {
+      "annee_ou_periode": "1991-1995",
+      "titre_structure": "Malmö FF - École de Football",
+      "details": "Débuts au football, catégories jeunes",
+      "ordre": 0
+    },
+    {
+      "annee_ou_periode": "1995-1999",
+      "titre_structure": "Malmö FF - Centre de Formation",
+      "details": "Formation complète, intégration en équipe première à 18 ans",
+      "ordre": 1
+    },
+    {
+      "annee_ou_periode": "2001",
+      "titre_structure": "Sélection Suède U21",
+      "details": "Première sélection en équipe nationale",
+      "ordre": 2
+    }
+  ],
+  "interets": [
+    {
+      "club": "AC Milan",
+      "annee": "2024",
+      "logo_club": "/logos/ac-milan.png",
+      "ordre": 0
+    },
+    {
+      "club": "Hammarby IF",
+      "annee": "2024",
+      "logo_club": "/logos/hammarby.png",
+      "ordre": 1
+    }
+  ]
+}

@@ -19,6 +19,27 @@ Exemple minimal avec uniquement les champs obligatoires :
 - 1 intérêt minimum
 - Parfait pour tester rapidement
 
+### 3. `post-formulaire-cr7.json`
+Formulaire complet pour Cristiano Ronaldo :
+- Carrière complète (Al-Nassr, Manchester United, Real Madrid)
+- 6 qualités caractéristiques
+- Formations et sélections
+- Données réalistes
+
+### 4. `post-formulaire-messi.json`
+Formulaire complet pour Lionel Messi :
+- Carrière complète (Inter Miami, PSG, FC Barcelone)
+- 6 qualités caractéristiques
+- Formations (Newell's, La Masia)
+- Données réalistes
+
+### 5. `post-formulaire-zlatan.json`
+Formulaire complet pour Zlatan Ibrahimović :
+- Carrière complète (AC Milan, LA Galaxy, Manchester United, PSG)
+- 6 qualités caractéristiques
+- Formations (Malmö FF)
+- Données réalistes
+
 #### GET all - Récupérer tous les formulaires
 
 ```bash
@@ -34,7 +55,7 @@ curl -X GET http://localhost:3000/api/formulaires-joueur/{id}
 #### POST - Créer un nouveau formulaire
 
 ```bash
-# Exemple complet
+# Exemple complet (Mbappé)
 curl -X POST http://localhost:3000/api/formulaires-joueur \
   -H "Content-Type: application/json" \
   -d @examples/post-formulaire-example.json
@@ -43,6 +64,21 @@ curl -X POST http://localhost:3000/api/formulaires-joueur \
 curl -X POST http://localhost:3000/api/formulaires-joueur \
   -H "Content-Type: application/json" \
   -d @examples/post-formulaire-minimal.json
+
+# Cristiano Ronaldo
+curl -X POST http://localhost:3000/api/formulaires-joueur \
+  -H "Content-Type: application/json" \
+  -d @examples/post-formulaire-cr7.json
+
+# Lionel Messi
+curl -X POST http://localhost:3000/api/formulaires-joueur \
+  -H "Content-Type: application/json" \
+  -d @examples/post-formulaire-messi.json
+
+# Zlatan Ibrahimović
+curl -X POST http://localhost:3000/api/formulaires-joueur \
+  -H "Content-Type: application/json" \
+  -d @examples/post-formulaire-zlatan.json
 ```
 
 #### PUT by ID - Mettre à jour un formulaire

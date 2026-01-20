@@ -1,0 +1,114 @@
+{
+  "nom": "Messi",
+  "prenom": "Lionel",
+  "nationalites": ["Argentine", "Espagne"],
+  "date_naissance": "1987-06-24",
+  "pied_fort": "Gauche",
+  "taille_cm": 170,
+  "couleur_cv": "#1E5EFF",
+  "poste_principal": "Attaquant",
+  "poste_secondaire": "Milieu offensif",
+  "url_transfermarkt": "https://www.transfermarkt.fr/lionel-messi/profil/spieler/28003",
+  "photo_joueur": "/photos/messi.jpg",
+  "vma": 18.5,
+  "envergure": null,
+  "email": "lionel.messi@example.com",
+  "telephone": "+5491123456789",
+  "email_agent_sportif": "horacio@example.com",
+  "telephone_agent_sportif": "+5491198765432",
+  "qualites": [
+    "Dribble",
+    "Passe",
+    "Vision",
+    "Finition",
+    "Technique",
+    "Créativité"
+  ],
+  "saisons": [
+    {
+      "club": "Inter Miami",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/inter-miami.png",
+      "logo_division": "/logos/mls.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": false,
+      "badge_coupe_remportee": true,
+      "matchs": null,
+      "buts": null,
+      "passes_decisives": null,
+      "temps_jeu_moyen": null,
+      "saison_actuelle": true,
+      "ordre": 0
+    },
+    {
+      "club": "Paris Saint-Germain",
+      "categorie": "Séniors",
+      "division": "Ligue 1",
+      "logo_club": "/logos/psg.png",
+      "logo_division": "/logos/ligue1.png",
+      "badge_capitanat": false,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": false,
+      "matchs": 32,
+      "buts": 16,
+      "passes_decisives": 16,
+      "temps_jeu_moyen": 82,
+      "saison_actuelle": false,
+      "ordre": 1
+    },
+    {
+      "club": "FC Barcelone",
+      "categorie": "Séniors",
+      "division": "Autre",
+      "logo_club": "/logos/barcelona.png",
+      "logo_division": "/logos/la-liga.png",
+      "badge_capitanat": true,
+      "badge_surclasse": false,
+      "badge_champion": true,
+      "badge_coupe_remportee": true,
+      "matchs": 35,
+      "buts": 30,
+      "passes_decisives": 9,
+      "temps_jeu_moyen": 85,
+      "saison_actuelle": false,
+      "ordre": 2
+    }
+  ],
+  "formations": [
+    {
+      "annee_ou_periode": "1994-2000",
+      "titre_structure": "Newell's Old Boys",
+      "details": "Formation de base, catégories jeunes",
+      "ordre": 0
+    },
+    {
+      "annee_ou_periode": "2000-2004",
+      "titre_structure": "La Masia - FC Barcelone",
+      "details": "Formation complète au centre de formation du Barça, intégration en équipe première à 17 ans",
+      "ordre": 1
+    },
+    {
+      "annee_ou_periode": "2005",
+      "titre_structure": "Sélection Argentine U20",
+      "details": "Champion du Monde U20",
+      "ordre": 2
+    }
+  ],
+  "interets": [
+    {
+      "club": "FC Barcelone",
+      "annee": "2024",
+      "logo_club": "/logos/barcelona.png",
+      "ordre": 0
+    },
+    {
+      "club": "Inter Miami",
+      "annee": "2024",
+      "logo_club": "/logos/inter-miami.png",
+      "ordre": 1
+    }
+  ]
+}
