@@ -200,13 +200,11 @@ export async function GET(
       interets: interetsWithBase64,
     } as FormulaireJoueur;
 
-    // Générer le PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(PlayerCV, { formulaire: formulaireData })
+      React.createElement(PlayerCV, { formulaire: formulaireData }) as any
     );
 
-    // Retourner le PDF avec les headers appropriés
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="CV_${formulaireData.prenom}_${formulaireData.nom}.pdf"`,
