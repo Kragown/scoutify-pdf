@@ -64,6 +64,7 @@ export const careerStepSchema = z.object({
     matchs: z.number().nullable().optional(),
     buts: z.number().nullable().optional(),
     passes_decisives: z.number().nullable().optional(),
+    clean_sheets: z.number().nullable().optional(),
     temps_jeu_moyen: z.number().nullable().optional(),
     saison_actuelle: z.boolean().optional(),
 });
@@ -88,18 +89,21 @@ export const saisonSchema = z.object({
     ] as const),
     logo_club: z.string().min(1, "Le logo du club est obligatoire"),
     logo_division: z.string().min(1, "Le logo de la division est obligatoire"),
-    badge_capitanat: z.boolean().default(false),
-    badge_surclasse: z.boolean().default(false),
-    badge_champion: z.boolean().default(false),
     badge_coupe_remportee: z.boolean().default(false),
     matchs: z.number().int().min(0).nullable().optional(),
     buts: z.number().int().min(0).nullable().optional(),
     passes_decisives: z.number().int().min(0).nullable().optional(),
+    clean_sheets: z.number().int().min(0).nullable().optional(),
     temps_jeu_moyen: z.number().int().min(1).max(90).nullable().optional(),
     saison_actuelle: z.boolean().default(false),
     ordre: z.number().int().min(0).default(0),
 }).refine((data) => {
-    if (!data.saison_actuelle && (data.matchs === null || data.matchs === undefined)) {
+    // If it's the current season, we don't enforce stats fields to be present
+    if (data.saison_actuelle) {
+        return true;
+    }
+    // Otherwise, matches are required
+    if (data.matchs === null || data.matchs === undefined) {
         return false;
     }
     return true;
@@ -123,7 +127,7 @@ export const formationSchema = z.object({
     ordre: z.number().int().min(0).default(0),
 });
 
-export const formationsSchema = z.array(formationSchema).min(1, "Au moins une formation est requise");
+export const formationsSchema = z.array(formationSchema);
 
 // Interet Schema (From Backend)
 export const interetSchema = z.object({
@@ -133,7 +137,7 @@ export const interetSchema = z.object({
     ordre: z.number().int().min(0).default(0),
 });
 
-export const interetsSchema = z.array(interetSchema).min(1, "Au moins un intérêt est requis");
+export const interetsSchema = z.array(interetSchema);
 
 // Full Player Store Schema (Merged)
 export const fullPlayerSchema = identitySchema

@@ -7,6 +7,7 @@ import { ArrowLeft, Check, Plus, Trash2, Heart } from "lucide-react";
 import { z } from "zod";
 import React from "react";
 import { interetSchema, interetsSchema } from "@/lib/schemas";
+import { useRouter } from "next/navigation";
 
 // Schema local pour le formulaire
 const interestsFormSchema = z.object({
@@ -18,16 +19,12 @@ type InterestsFormData = z.infer<typeof interestsFormSchema>;
 export function InterestsStep() {
     const { data, updateData, setStep } = usePlayerStore();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const router = useRouter();
 
     const form = useForm<InterestsFormData>({
         resolver: zodResolver(interestsFormSchema),
         defaultValues: {
-            interets: (data.interets && data.interets.length > 0 ? data.interets : [{
-                club: "",
-                annee: new Date().getFullYear().toString(),
-                logo_club: "/logos/default-club.png",
-                ordre: 0
-            }]) as any
+            interets: (data.interets && data.interets.length > 0 ? data.interets : []) as any
         },
         mode: "onBlur"
     });
@@ -73,15 +70,18 @@ export function InterestsStep() {
                     division: c.division,
                     logo_club: "/logos/default-club.png",
                     logo_division: "/logos/default-division.png",
-                    badge_capitanat: c.badge_capitanat ? 1 : 0,
-                    badge_surclasse: c.badge_surclasse ? 1 : 0,
-                    badge_champion: c.badge_champion ? 1 : 0,
-                    badge_coupe_remportee: c.badge_coupe_remportee ? 1 : 0,
-                    matchs: c.saison_actuelle ? null : (c.matchs || 0),
+                    badge_capitanat: !!c.badge_capitanat,
+                    badge_surclasse: !!c.badge_surclasse,
+                    badge_champion: !!c.badge_champion,
+                    badge_coupe_remportee: !!c.badge_coupe_remportee,
+                    mi_saison: !!c.mi_saison,
+                    periode_type: c.periode_type || null,
+                    matchs: c.saison_actuelle ? null : (c.matchs ?? 0),
                     buts: c.buts || 0,
                     passes_decisives: c.passes_decisives || 0,
+                    clean_sheets: c.clean_sheets || null,
                     temps_jeu_moyen: c.temps_jeu_moyen || null,
-                    saison_actuelle: c.saison_actuelle ? 1 : 0,
+                    saison_actuelle: !!c.saison_actuelle,
                     ordre: index
                 })) || [],
 
@@ -93,8 +93,14 @@ export function InterestsStep() {
                     ordre: index
                 })),
 
-                // Formations (Vide pour l'instant si pas demandé explicitement, ou à gérer plus tard)
-                formations: []
+
+                // Formations
+                formations: finalData.formations?.map((f, index) => ({
+                    annee_ou_periode: f.annee_ou_periode,
+                    titre_structure: f.titre_structure,
+                    details: f.details || null,
+                    ordre: f.ordre ?? index
+                })) || []
             };
 
             const response = await fetch('/api/formulaires-joueur', {
@@ -110,7 +116,8 @@ export function InterestsStep() {
                 throw new Error(result.error || "Erreur lors de la sauvegarde.");
             }
 
-            setStep(6); // SuccessPage (Step 5+1)
+            // Redirect to landing page
+            router.push('/');
 
         } catch (error: any) {
             alert("Erreur : " + error.message);
@@ -118,6 +125,8 @@ export function InterestsStep() {
             setIsSubmitting(false);
         }
     };
+
+    const YEARS = Array.from({ length: 7 }, (_, i) => (2020 + i).toString());
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 animate-fade-in pb-20">
@@ -130,7 +139,7 @@ export function InterestsStep() {
                 </div>
                 <button
                     type="button"
-                    onClick={() => append({ club: "", annee: new Date().getFullYear().toString(), logo_club: "/logos/default-club.png", ordre: fields.length })}
+                    onClick={() => append({ club: "", annee: "", logo_club: "/logos/default-club.png", ordre: fields.length })}
                     className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-full hover:bg-[#D4AF37]/20 transition-all text-sm font-bold"
                 >
                     <Plus className="w-4 h-4" />
@@ -165,31 +174,28 @@ export function InterestsStep() {
 
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Année</label>
-                                <input
+                                <select
                                     {...form.register(`interets.${index}.annee`)}
-                                    placeholder="YYYY"
-                                    maxLength={4}
-                                    onInput={(e) => {
-                                        const target = e.target as HTMLInputElement;
-                                        target.value = target.value.replace(/[^0-9]/g, '');
-                                    }}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none transition-colors text-center"
-                                />
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none text-center"
+                                >
+                                    <option value="">Choisir...</option>
+                                    {YEARS.map(y => (
+                                        <option key={y} value={y} className="bg-black">{y}</option>
+                                    ))}
+                                </select>
                                 {form.formState.errors.interets?.[index]?.annee && (
                                     <p className="text-red-400 text-xs">{form.formState.errors.interets[index]?.annee?.message}</p>
                                 )}
                             </div>
                         </div>
 
-                        {fields.length > 1 && (
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="absolute -bottom-3 right-6 bg-[#111] text-red-500/50 hover:text-red-500 text-xs px-3 py-1 rounded-full border border-white/5 hover:border-red-500/30 transition-all flex items-center gap-1"
-                            >
-                                <Trash2 className="w-3 h-3" /> Supprimer
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="absolute -bottom-3 right-6 bg-[#111] text-red-500/50 hover:text-red-500 text-xs px-3 py-1 rounded-full border border-white/5 hover:border-red-500/30 transition-all flex items-center gap-1"
+                        >
+                            <Trash2 className="w-3 h-3" /> Supprimer
+                        </button>
                     </div>
                 ))}
             </div>

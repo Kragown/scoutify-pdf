@@ -21,12 +21,7 @@ export function FormationStep() {
     const form = useForm<FormationFormData>({
         resolver: zodResolver(formationFormSchema),
         defaultValues: {
-            formations: (data.formations && data.formations.length > 0 ? data.formations : [{
-                annee_ou_periode: "",
-                titre_structure: "",
-                details: "",
-                ordre: 0
-            }]) as any
+            formations: (data.formations && data.formations.length > 0 ? data.formations : []) as any
         },
         mode: "onBlur"
     });
@@ -71,15 +66,15 @@ export function FormationStep() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Période / Année</label>
-                                    <input
+                                    <select
                                         {...form.register(`formations.${index}.annee_ou_periode`)}
-                                        placeholder="Ex: 2018-2022"
-                                        onInput={(e) => {
-                                            const target = e.target as HTMLInputElement;
-                                            target.value = target.value.replace(/[a-zA-Z]/g, '');
-                                        }}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none transition-colors"
-                                    />
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none"
+                                    >
+                                        <option value="">Choisir...</option>
+                                        {Array.from({ length: 7 }, (_, i) => (2020 + i).toString()).map(y => (
+                                            <option key={y} value={y} className="bg-black">{y}</option>
+                                        ))}
+                                    </select>
                                     {form.formState.errors.formations?.[index]?.annee_ou_periode && (
                                         <p className="text-red-400 text-xs">{form.formState.errors.formations[index]?.annee_ou_periode?.message}</p>
                                     )}
@@ -117,15 +112,13 @@ export function FormationStep() {
                             </div>
                         </div>
 
-                        {fields.length > 1 && (
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="absolute -bottom-3 right-6 bg-[#111] text-red-500/50 hover:text-red-500 text-xs px-3 py-1 rounded-full border border-white/5 hover:border-red-500/30 transition-all flex items-center gap-1"
-                            >
-                                <Trash2 className="w-3 h-3" /> Supprimer
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="absolute -bottom-3 right-6 bg-[#111] text-red-500/50 hover:text-red-500 text-xs px-3 py-1 rounded-full border border-white/5 hover:border-red-500/30 transition-all flex items-center gap-1"
+                        >
+                            <Trash2 className="w-3 h-3" /> Supprimer
+                        </button>
                     </div>
                 ))}
             </div>
