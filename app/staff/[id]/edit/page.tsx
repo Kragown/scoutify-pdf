@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, Plus, X, Calendar } from "lucide-react";
-import { FormulaireJoueur, POSTES, CreateSaisonDto, DIVISIONS } from "@/lib/types";
+import { FormulaireJoueur, POSTES, CreateSaisonDto, DIVISIONS, CreateFormationDto, CreateInteretDto } from "@/lib/types";
 
 export default function EditFormulairePage() {
   const params = useParams();
@@ -13,6 +13,8 @@ export default function EditFormulairePage() {
   const [formulaire, setFormulaire] = useState<FormulaireJoueur | null>(null);
   const [qualites, setQualites] = useState<string[]>([]);
   const [saisons, setSaisons] = useState<CreateSaisonDto[]>([]);
+  const [formations, setFormations] = useState<CreateFormationDto[]>([]);
+  const [interets, setInterets] = useState<CreateInteretDto[]>([]);
   const [nationalites, setNationalites] = useState<string[]>([]);
   const [newNationalite, setNewNationalite] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -56,7 +58,21 @@ export default function EditFormulairePage() {
             ordre: s.ordre || 0,
           })) || [];
           setSaisons(saisonsArray);
-          // Initialiser les prévisualisations des logos
+          const formationsArray = data.data.formations?.map((f: any) => ({
+            annee_ou_periode: f.annee_ou_periode || '',
+            titre_structure: f.titre_structure || '',
+            details: f.details || null,
+            ordre: f.ordre || 0,
+          })) || [];
+          setFormations(formationsArray);
+          const interetsArray = data.data.interets?.map((i: any) => ({
+            club: i.club || '',
+            annee: i.annee || '',
+            logo_club: i.logo_club || '',
+            ordre: i.ordre || 0,
+          })) || [];
+          setInterets(interetsArray);
+          // Initialiser les prévisualisations des logos (saisons + intérêts)
           const logoPreviewsMap: Record<string, string> = {};
           saisonsArray.forEach((s: any, index: number) => {
             if (s.logo_club) {
@@ -64,6 +80,11 @@ export default function EditFormulairePage() {
             }
             if (s.logo_division) {
               logoPreviewsMap[`${index}-division`] = s.logo_division;
+            }
+          });
+          interetsArray.forEach((i: any, index: number) => {
+            if (i.logo_club) {
+              logoPreviewsMap[`interet-${index}`] = i.logo_club;
             }
           });
           setLogoPreviews(logoPreviewsMap);
@@ -162,6 +183,14 @@ export default function EditFormulairePage() {
           qualites: validQualites,
           saisons: saisons.map((s, index) => ({
             ...s,
+            ordre: index,
+          })),
+          formations: formations.map((f, index) => ({
+            ...f,
+            ordre: index,
+          })),
+          interets: interets.map((i, index) => ({
+            ...i,
             ordre: index,
           })),
         }),
@@ -288,6 +317,111 @@ export default function EditFormulairePage() {
     const newSaisons = [...saisons];
     newSaisons[index] = { ...newSaisons[index], [field]: value };
     setSaisons(newSaisons);
+  };
+
+  const addFormation = () => {
+    setFormations([...formations, {
+      annee_ou_periode: '',
+      titre_structure: '',
+      details: null,
+      ordre: formations.length,
+    }]);
+  };
+
+  const removeFormation = (index: number) => {
+    setFormations(formations.filter((_, i) => i !== index));
+  };
+
+  const updateFormation = (index: number, field: keyof CreateFormationDto, value: any) => {
+    const newFormations = [...formations];
+    newFormations[index] = { ...newFormations[index], [field]: value };
+    setFormations(newFormations);
+  };
+
+  const addInteret = () => {
+    setInterets([...interets, {
+      club: '',
+      annee: '',
+      logo_club: '',
+      ordre: interets.length,
+    }]);
+  };
+
+  const removeInteret = (index: number) => {
+    setInterets(interets.filter((_, i) => i !== index));
+    // Supprimer la prévisualisation associée
+    const newPreviews = { ...logoPreviews };
+    delete newPreviews[`interet-${index}`];
+    // Réindexer les prévisualisations pour les intérêts suivants
+    const updatedPreviews: Record<string, string> = {};
+    Object.keys(newPreviews).forEach((key) => {
+      if (key.startsWith('interet-')) {
+        const oldIndex = parseInt(key.split('-')[1]);
+        if (oldIndex > index) {
+          updatedPreviews[`interet-${oldIndex - 1}`] = newPreviews[key];
+        } else if (oldIndex < index) {
+          updatedPreviews[key] = newPreviews[key];
+        }
+      } else {
+        updatedPreviews[key] = newPreviews[key];
+      }
+    });
+    setLogoPreviews(updatedPreviews);
+  };
+
+  const updateInteret = (index: number, field: keyof CreateInteretDto, value: any) => {
+    const newInterets = [...interets];
+    newInterets[index] = { ...newInterets[index], [field]: value };
+    setInterets(newInterets);
+  };
+
+  const handleInteretLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, interetIndex: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError("Le fichier doit être une image");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("L'image ne doit pas dépasser 5MB");
+        return;
+      }
+
+      const key = `interet-${interetIndex}`;
+      setUploadingLogos({ ...uploadingLogos, [key]: true });
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', 'logo');
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          updateInteret(interetIndex, 'logo_club', data.path);
+          setLogoPreviews({ ...logoPreviews, [key]: data.path });
+          setError(null);
+        } else {
+          setError(data.error || "Erreur lors de l'upload de l'image");
+        }
+      } catch (err) {
+        setError("Erreur lors de l'upload de l'image");
+        console.error(err);
+      } finally {
+        setUploadingLogos({ ...uploadingLogos, [key]: false });
+      }
+    }
+  };
+
+  const handleInteretLogoUrlChange = (e: React.ChangeEvent<HTMLInputElement>, interetIndex: number) => {
+    const url = e.target.value;
+    const key = `interet-${interetIndex}`;
+    updateInteret(interetIndex, 'logo_club', url);
+    setLogoPreviews({ ...logoPreviews, [key]: url || '' });
   };
 
   const cropImageToPortrait = (file: File): Promise<File> => {
@@ -1358,6 +1492,232 @@ export default function EditFormulairePage() {
                 ))}
                 {saisons.length === 0 && (
                   <p className="text-white/40 text-sm italic">Aucune saison. Cliquez sur "Ajouter une saison" pour en ajouter une.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Formations */}
+            <div className="bg-scout-card border border-white/10 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wide border-b border-white/10 pb-3 flex-1">
+                  Formations
+                </h2>
+                <button
+                  type="button"
+                  onClick={addFormation}
+                  className="bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter une formation
+                </button>
+              </div>
+              <div className="space-y-6">
+                {formations.map((formation, index) => (
+                  <div key={index} className="border border-white/10 rounded-lg p-4 bg-black/20">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-white font-bold uppercase tracking-wide">Formation {index + 1}</h3>
+                      <button
+                        type="button"
+                        onClick={() => removeFormation(index)}
+                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Supprimer cette formation"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Année ou période *
+                        </label>
+                        <select
+                          value={formation.annee_ou_periode}
+                          onChange={(e) => updateFormation(index, 'annee_ou_periode', e.target.value)}
+                          required
+                          className="input-field"
+                        >
+                          <option value="">Sélectionner une période</option>
+                          {['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026'].map((periode) => (
+                            <option key={periode} value={periode}>
+                              {periode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Titre ou structure *
+                        </label>
+                        <input
+                          type="text"
+                          value={formation.titre_structure}
+                          onChange={(e) => updateFormation(index, 'titre_structure', e.target.value)}
+                          required
+                          maxLength={1000}
+                          className="input-field"
+                          placeholder="Diplôme, certification, etc."
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Détails
+                        </label>
+                        <textarea
+                          value={formation.details || ''}
+                          onChange={(e) => updateFormation(index, 'details', e.target.value || null)}
+                          maxLength={1000}
+                          rows={3}
+                          className="input-field"
+                          placeholder="Détails supplémentaires (optionnel)"
+                        />
+                        <p className="text-white/40 text-xs mt-1">Maximum 1000 caractères</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {formations.length === 0 && (
+                  <p className="text-white/40 text-sm italic">Aucune formation. Cliquez sur "Ajouter une formation" pour en ajouter une.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Marques d'Intérêts */}
+            <div className="bg-scout-card border border-white/10 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wide border-b border-white/10 pb-3 flex-1">
+                  Marques d'Intérêts
+                </h2>
+                <button
+                  type="button"
+                  onClick={addInteret}
+                  className="bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter un intérêt
+                </button>
+              </div>
+              <div className="space-y-6">
+                {interets.map((interet, index) => (
+                  <div key={index} className="border border-white/10 rounded-lg p-4 bg-black/20">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-white font-bold uppercase tracking-wide">Intérêt {index + 1}</h3>
+                      <button
+                        type="button"
+                        onClick={() => removeInteret(index)}
+                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Supprimer cet intérêt"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Club *
+                        </label>
+                        <input
+                          type="text"
+                          value={interet.club}
+                          onChange={(e) => updateInteret(index, 'club', e.target.value)}
+                          required
+                          className="input-field"
+                          placeholder="Nom du club"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Année *
+                        </label>
+                        <select
+                          value={interet.annee}
+                          onChange={(e) => updateInteret(index, 'annee', e.target.value)}
+                          required
+                          className="input-field"
+                        >
+                          <option value="">Sélectionner une année</option>
+                          {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map((annee) => (
+                            <option key={annee} value={annee.toString()}>
+                              {annee}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Logo Club
+                        </label>
+                        <div className="space-y-4">
+                          {/* Prévisualisation Logo Club */}
+                          {logoPreviews[`interet-${index}`] && (
+                            <div className="relative w-full max-w-xs">
+                              <img
+                                src={logoPreviews[`interet-${index}`]}
+                                alt="Logo du club"
+                                className="w-24 h-24 object-contain rounded-lg border border-white/10 bg-white/5 p-2"
+                                onError={() => {
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`interet-${index}`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateInteret(index, 'logo_club', '');
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`interet-${index}`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                                title="Supprimer le logo"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* Upload de fichier */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Télécharger une image
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleInteretLogoUpload(e, index)}
+                                disabled={uploadingLogos[`interet-${index}`]}
+                                className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600 file:cursor-pointer file:transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              {uploadingLogos[`interet-${index}`] && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <Loader2 className="w-5 h-5 text-scout-orange animate-spin" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-white/40 text-xs mt-1">Formats acceptés: JPG, PNG, GIF • Max 5MB</p>
+                          </div>
+
+                          {/* Ou URL */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Ou entrer une URL ou un chemin
+                            </label>
+                            <input
+                              type="text"
+                              value={interet.logo_club?.startsWith('data:') ? '' : (interet.logo_club || '')}
+                              onChange={(e) => handleInteretLogoUrlChange(e, index)}
+                              className="input-field"
+                              placeholder="https://example.com/logo.jpg ou /logos/club.jpg"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {interets.length === 0 && (
+                  <p className="text-white/40 text-sm italic">Aucun intérêt. Cliquez sur "Ajouter un intérêt" pour en ajouter un.</p>
                 )}
               </div>
             </div>
