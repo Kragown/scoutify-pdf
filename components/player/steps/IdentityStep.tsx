@@ -99,7 +99,7 @@ export function IdentityStep() {
 
                 {/* Prénom et Nom - Bloque les chiffres */}
                 <div className="grid grid-cols-2 gap-4">
-                    <InputGroup label="Prénom" error={form.formState.errors.firstName?.message}>
+                    <InputGroup label={<>Prénom <span className="text-red-500">*</span></>} error={form.formState.errors.firstName?.message}>
                         <input
                             {...form.register("firstName")}
                             className="input-field"
@@ -109,7 +109,7 @@ export function IdentityStep() {
                             }}
                         />
                     </InputGroup>
-                    <InputGroup label="Nom" error={form.formState.errors.lastName?.message}>
+                    <InputGroup label={<>Nom <span className="text-red-500">*</span></>} error={form.formState.errors.lastName?.message}>
                         <input
                             {...form.register("lastName")}
                             className="input-field"
@@ -123,7 +123,7 @@ export function IdentityStep() {
 
                 {/* Date de naissance avec icone calendrier blanc */}
                 <div className="grid grid-cols-1 gap-4">
-                    <InputGroup label="Date de naissance" error={form.formState.errors.birthDate?.message}>
+                    <InputGroup label={<>Date de naissance <span className="text-red-500">*</span></>} error={form.formState.errors.birthDate?.message}>
                         <div className="relative">
                             <input
                                 type="date"
@@ -137,7 +137,7 @@ export function IdentityStep() {
 
                 {/* ========== NATIONALITÉS - CHAMP LIBRE UNIQUEMENT ========== */}
                 <div className="space-y-3">
-                    <label className="text-sm font-medium text-white/80">Nationalité(s) *</label>
+                    <label className="text-sm font-medium text-white/80">Nationalité(s) <span className="text-red-500">*</span></label>
 
                     {/* Champ texte pour ajouter une nationalité - Bloque les chiffres */}
                     <div className="space-y-2">
@@ -232,7 +232,7 @@ export function IdentityStep() {
 
                 {/* Taille (max 3 chiffres) et Pied fort */}
                 <div className="grid grid-cols-2 gap-4">
-                    <InputGroup label="Taille (cm)" error={form.formState.errors.height?.message}>
+                    <InputGroup label={<>Taille (cm) <span className="text-red-500">*</span></>} error={form.formState.errors.height?.message}>
                         <input
                             type="number"
                             {...form.register("height")}
@@ -243,7 +243,7 @@ export function IdentityStep() {
                             }}
                         />
                     </InputGroup>
-                    <InputGroup label="Pied Fort" error={form.formState.errors.strongFoot?.message}>
+                    <InputGroup label={<>Pied Fort <span className="text-red-500">*</span></>} error={form.formState.errors.strongFoot?.message}>
                         <select {...form.register("strongFoot")} className="input-field">
                             <option value="">Sélectionner</option>
                             <option value="Droit">Droit</option>
@@ -301,7 +301,7 @@ export function IdentityStep() {
                 {form.watch("isInternational") && (
                     <div className="grid grid-cols-1 gap-4 p-4 bg-white/5 rounded-lg md:grid-cols-2">
                         {/* Niveau international - Sélect */}
-                        <InputGroup label="Niveau international *" error={form.formState.errors.internationalLevel?.message}>
+                        <InputGroup label={<>Niveau international <span className="text-red-500">*</span></>} error={form.formState.errors.internationalLevel?.message}>
                             <select {...form.register("internationalLevel")} className="input-field">
                                 <option value="">Sélectionner</option>
                                 {INTERNATIONAL_LEVELS.map((level) => (
@@ -311,7 +311,7 @@ export function IdentityStep() {
                         </InputGroup>
 
                         {/* Pays - Champ libre texte (Bloque les chiffres) */}
-                        <InputGroup label="Pays *" error={form.formState.errors.internationalCountry?.message}>
+                        <InputGroup label={<>Pays <span className="text-red-500">*</span></>} error={form.formState.errors.internationalCountry?.message}>
                             <input
                                 type="text"
                                 {...form.register("internationalCountry")}
@@ -338,10 +338,10 @@ export function IdentityStep() {
                 <div className="space-y-4">
                     <h3 className="text-sm font-medium text-white">Contact joueur *</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InputGroup label="Email" error={form.formState.errors.email?.message}>
+                        <InputGroup label={<>Email <span className="text-red-500">*</span></>} error={form.formState.errors.email?.message}>
                             <input type="email" {...form.register("email")} className="input-field" placeholder="contact@example.com" />
                         </InputGroup>
-                        <InputGroup label="Téléphone" error={form.formState.errors.phone?.message}>
+                        <InputGroup label={<>Téléphone <span className="text-red-500">*</span></>} error={form.formState.errors.phone?.message}>
                             <input
                                 type="tel"
                                 {...form.register("phone")}
@@ -423,7 +423,7 @@ export function IdentityStep() {
 }
 
 // Composant réutilisable pour les groupes d'inputs avec label et erreur
-function InputGroup({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function InputGroup({ label, error, children }: { label: React.ReactNode; error?: string; children: React.ReactNode }) {
     return (
         <div className="space-y-1">
             <label className="text-sm font-medium text-white/80">{label}</label>

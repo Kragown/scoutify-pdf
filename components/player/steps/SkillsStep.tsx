@@ -20,7 +20,7 @@ const CATEGORIES = [
     'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U20', 'U21', 'Séniors'
 ];
 
-const YEARS = Array.from({ length: 7 }, (_, i) => (2020 + i).toString());
+const SEASONS = Array.from({ length: 7 }, (_, i) => `${2020 + i}/${2020 + i + 1}`);
 
 const BADGES = [
     { key: 'badge_capitanat', label: 'Capitaine', icon: Star },
@@ -121,8 +121,6 @@ export function SkillsStep() {
                 badge_coupe_remportee: c.badge_coupe_remportee,
                 saison_actuelle: c.saison_actuelle,
                 mi_saison: c.mi_saison,
-                saison_actuelle: c.saison_actuelle,
-                mi_saison: c.mi_saison,
                 periode_type: c.periode_type === "" ? null : c.periode_type,
                 matchs: c.matchs || undefined,
                 buts: c.buts || undefined,
@@ -146,9 +144,7 @@ export function SkillsStep() {
                 saison_actuelle: c.saison_actuelle,
                 ordre: idx
             }))
-        });
-
-        setIsSubmitting(false);
+        }); setIsSubmitting(false);
         setStep(5); // Go to Formation Step
     };
 
@@ -193,17 +189,17 @@ export function SkillsStep() {
                                 {/* Header Ligne: Saison & Club */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Saison</label>
+                                        <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Saison <span className="text-red-500">*</span></label>
                                         <select
                                             {...form.register(`career.${index}.year`)}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none"
                                         >
                                             <option value="">Choisir...</option>
-                                            {YEARS.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
+                                            {SEASONS.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
                                         </select>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Club</label>
+                                        <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Club <span className="text-red-500">*</span></label>
                                         <input
                                             {...form.register(`career.${index}.club`)}
                                             placeholder="Nom du club"
@@ -215,14 +211,14 @@ export function SkillsStep() {
                                 {/* Ligne: Categorie & Division */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Catégorie</label>
+                                        <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Catégorie <span className="text-red-500">*</span></label>
                                         <select {...form.register(`career.${index}.categorie`)} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none">
                                             <option value="">Choisir...</option>
                                             {CATEGORIES.map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
                                         </select>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Division</label>
+                                        <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Division <span className="text-red-500">*</span></label>
                                         <select {...form.register(`career.${index}.division`)} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none">
                                             <option value="">Choisir...</option>
                                             {DIVISIONS.map(d => <option key={d} value={d} className="bg-black">{d}</option>)}

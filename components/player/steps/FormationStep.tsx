@@ -65,13 +65,13 @@ export function FormationStep() {
                         <div className="relative z-10 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Période / Année</label>
+                                    <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Période / Année <span className="text-red-500">*</span></label>
                                     <select
                                         {...form.register(`formations.${index}.annee_ou_periode`)}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none"
                                     >
                                         <option value="">Choisir...</option>
-                                        {Array.from({ length: 7 }, (_, i) => (2020 + i).toString()).map(y => (
+                                        {Array.from({ length: 7 }, (_, i) => `${2020 + i}/${2020 + i + 1}`).map(y => (
                                             <option key={y} value={y} className="bg-black">{y}</option>
                                         ))}
                                     </select>
@@ -81,7 +81,7 @@ export function FormationStep() {
                                 </div>
 
                                 <div className="md:col-span-2 space-y-1">
-                                    <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Titre / Structure</label>
+                                    <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Titre / Structure <span className="text-red-500">*</span></label>
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
                                             <GraduationCap className="w-5 h-5 text-white/30" />

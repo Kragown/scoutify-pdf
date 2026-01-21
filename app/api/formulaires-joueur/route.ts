@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const formulaires = db.prepare('SELECT * FROM formulaires_joueur ORDER BY created_at DESC').all();
-    
+
     const formulairesAvecQualites = formulaires.map((formulaire: any) => {
       const qualites = db.prepare('SELECT * FROM qualites WHERE formulaire_joueur_id = ? ORDER BY ordre')
         .all(formulaire.id);
@@ -26,16 +26,16 @@ export async function GET() {
         .all(formulaire.id);
       const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
         .all(formulaire.id);
-      return { 
-        ...(formulaire as Record<string, any>), 
+      return {
+        ...(formulaire as Record<string, any>),
         archive: Boolean(formulaire.archive),
-        qualites, 
-        saisons, 
-        formations, 
-        interets 
+        qualites,
+        saisons,
+        formations,
+        interets
       };
     });
-    
+
     return NextResponse.json({
       success: true,
       data: formulairesAvecQualites,
@@ -53,10 +53,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body: CreateFormulaireJoueurDto = await request.json();
-    
-    if (!body.nom || !body.prenom || !body.nationalites || !body.date_naissance || 
-        !body.pied_fort || !body.taille_cm || !body.couleur_cv || 
-        !body.poste_principal || !body.photo_joueur || !body.email || !body.telephone) {
+
+    if (!body.nom || !body.prenom || !body.nationalites || !body.date_naissance ||
+      !body.pied_fort || !body.taille_cm || !body.couleur_cv ||
+      !body.poste_principal || !body.photo_joueur || !body.email || !body.telephone) {
       return NextResponse.json(
         { success: false, error: 'Tous les champs obligatoires doivent être remplis' },
         { status: 400 }
@@ -118,21 +118,21 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       if (body.qualites.length === 0) {
         return NextResponse.json(
           { success: false, error: 'Au moins une qualité est requise' },
           { status: 400 }
         );
       }
-      
+
       if (body.qualites.length > 6) {
         return NextResponse.json(
           { success: false, error: 'Maximum 6 qualités autorisées' },
           { status: 400 }
         );
       }
-      
+
       for (const qualite of body.qualites) {
         if (typeof qualite !== 'string' || qualite.trim().length === 0) {
           return NextResponse.json(
@@ -156,52 +156,52 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       if (body.saisons.length === 0) {
         return NextResponse.json(
           { success: false, error: 'Au moins une saison est requise' },
           { status: 400 }
         );
       }
-      
+
       for (let i = 0; i < body.saisons.length; i++) {
         const saison = body.saisons[i];
-        
+
         if (!saison.club || typeof saison.club !== 'string' || saison.club.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le nom du club est requis` },
             { status: 400 }
           );
         }
-        
+
         if (!saison.categorie || typeof saison.categorie !== 'string' || saison.categorie.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: la catégorie est requise` },
             { status: 400 }
           );
         }
-        
+
         if (!saison.division || !DIVISIONS.includes(saison.division)) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: division invalide. Doit être parmi: ${DIVISIONS.join(', ')}` },
             { status: 400 }
           );
         }
-        
+
         if (!saison.logo_club || typeof saison.logo_club !== 'string' || saison.logo_club.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le logo du club est obligatoire` },
             { status: 400 }
           );
         }
-        
+
         if (!saison.logo_division || typeof saison.logo_division !== 'string' || saison.logo_division.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le logo de la division est obligatoire` },
             { status: 400 }
           );
         }
-        
+
         const isSaisonActuelle = saison.saison_actuelle === true;
         if (!isSaisonActuelle && (saison.matchs === null || saison.matchs === undefined)) {
           return NextResponse.json(
@@ -209,28 +209,28 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        
+
         if (saison.matchs !== null && saison.matchs !== undefined && (typeof saison.matchs !== 'number' || saison.matchs < 0)) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le nombre de matchs doit être un nombre positif` },
             { status: 400 }
           );
         }
-        
+
         if (saison.buts !== null && saison.buts !== undefined && (typeof saison.buts !== 'number' || saison.buts < 0)) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le nombre de buts doit être un nombre positif` },
             { status: 400 }
           );
         }
-        
+
         if (saison.passes_decisives !== null && saison.passes_decisives !== undefined && (typeof saison.passes_decisives !== 'number' || saison.passes_decisives < 0)) {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le nombre de passes décisives doit être un nombre positif` },
             { status: 400 }
           );
         }
-        
+
         if (saison.temps_jeu_moyen !== null && saison.temps_jeu_moyen !== undefined) {
           if (typeof saison.temps_jeu_moyen !== 'number' || saison.temps_jeu_moyen < 1 || saison.temps_jeu_moyen > 90) {
             return NextResponse.json(
@@ -249,31 +249,31 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       for (let i = 0; i < body.formations.length; i++) {
         const formation = body.formations[i];
-        
+
         if (!formation.annee_ou_periode || typeof formation.annee_ou_periode !== 'string' || formation.annee_ou_periode.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La formation ${i + 1}: l'année ou période est requise` },
             { status: 400 }
           );
         }
-        
+
         if (!formation.titre_structure || typeof formation.titre_structure !== 'string' || formation.titre_structure.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `La formation ${i + 1}: le titre ou structure est requis` },
             { status: 400 }
           );
         }
-        
+
         if (formation.titre_structure.length > 1000) {
           return NextResponse.json(
             { success: false, error: `La formation ${i + 1}: le titre ou structure ne peut pas dépasser 1000 caractères` },
             { status: 400 }
           );
         }
-        
+
         if (formation.details !== null && formation.details !== undefined) {
           if (typeof formation.details !== 'string') {
             return NextResponse.json(
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
               { status: 400 }
             );
           }
-          
+
           if (formation.details.length > 1000) {
             return NextResponse.json(
               { success: false, error: `La formation ${i + 1}: les détails ne peuvent pas dépasser 1000 caractères` },
@@ -299,24 +299,24 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       for (let i = 0; i < body.interets.length; i++) {
         const interet = body.interets[i];
-        
+
         if (!interet.club || typeof interet.club !== 'string' || interet.club.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `L'intérêt ${i + 1}: le nom du club est requis` },
             { status: 400 }
           );
         }
-        
+
         if (!interet.annee || typeof interet.annee !== 'string' || interet.annee.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `L'intérêt ${i + 1}: l'année est requise` },
             { status: 400 }
           );
         }
-        
+
         if (!interet.logo_club || typeof interet.logo_club !== 'string' || interet.logo_club.trim().length === 0) {
           return NextResponse.json(
             { success: false, error: `L'intérêt ${i + 1}: le logo du club est obligatoire` },
@@ -326,156 +326,162 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const nationalitesStr = Array.isArray(body.nationalites) 
-      ? JSON.stringify(body.nationalites) 
+    const nationalitesStr = Array.isArray(body.nationalites)
+      ? JSON.stringify(body.nationalites)
       : body.nationalites;
 
     const insertFormulaire = db.transaction(() => {
-      const stmt = db.prepare(`
-        INSERT INTO formulaires_joueur (
-          nom, prenom, nationalites, date_naissance, pied_fort, 
-          taille_cm, couleur_cv, poste_principal, poste_secondaire,
-          url_transfermarkt, photo_joueur, vma, envergure,
-          email, telephone, email_agent_sportif, telephone_agent_sportif, archive
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      const result = stmt.run(
-        body.nom,
-        body.prenom,
-        nationalitesStr,
-        body.date_naissance,
-        body.pied_fort,
-        body.taille_cm,
-        body.couleur_cv,
-        body.poste_principal,
-        body.poste_secondaire || null,
-        body.url_transfermarkt || null,
-        body.photo_joueur,
-        body.vma || null,
-        body.envergure || null,
-        body.email,
-        body.telephone,
-        body.email_agent_sportif || null,
-        body.telephone_agent_sportif || null,
-        body.archive ? 1 : 0
-      );
-
-      const formulaireId = result.lastInsertRowid;
-
-      if (body.qualites && body.qualites.length > 0) {
-        const insertQualite = db.prepare(`
-          INSERT INTO qualites (formulaire_joueur_id, libelle, ordre)
-          VALUES (?, ?, ?)
+      try {
+        const stmt = db.prepare(`
+          INSERT INTO formulaires_joueur (
+            nom, prenom, nationalites, date_naissance, pied_fort, 
+            taille_cm, couleur_cv, poste_principal, poste_secondaire,
+            url_transfermarkt, photo_joueur, vma, envergure,
+            email, telephone, email_agent_sportif, telephone_agent_sportif, status, archive
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
-        body.qualites.forEach((libelle, index) => {
-          insertQualite.run(formulaireId, libelle.trim(), index);
-        });
+        const result = stmt.run(
+          body.nom,
+          body.prenom,
+          nationalitesStr,
+          body.date_naissance,
+          body.pied_fort,
+          body.taille_cm,
+          body.couleur_cv,
+          body.poste_principal,
+          body.poste_secondaire || null,
+          body.url_transfermarkt || null,
+          body.photo_joueur,
+          body.vma || null,
+          body.envergure || null,
+          body.email,
+          body.telephone,
+          body.email_agent_sportif || null,
+          body.telephone_agent_sportif || null,
+          body.status || 'À traiter',
+          body.archive ? 1 : 0
+        );
+
+        const formulaireId = result.lastInsertRowid;
+
+        if (body.qualites && body.qualites.length > 0) {
+          const insertQualite = db.prepare(`
+            INSERT INTO qualites (formulaire_joueur_id, libelle, ordre)
+            VALUES (?, ?, ?)
+          `);
+
+          body.qualites.forEach((libelle, index) => {
+            insertQualite.run(formulaireId, libelle.trim(), index);
+          });
+        }
+
+        if (body.saisons && body.saisons.length > 0) {
+          const insertSaison = db.prepare(`
+            INSERT INTO saisons (
+              formulaire_joueur_id, club, categorie, division, periode, mi_saison, periode_type, logo_club, logo_division,
+              badge_capitanat, badge_surclasse, badge_champion, badge_coupe_remportee,
+              matchs, buts, passes_decisives, temps_jeu_moyen, clean_sheets, saison_actuelle, ordre
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `);
+
+          body.saisons.forEach((saison: CreateSaisonDto, index: number) => {
+            insertSaison.run(
+              formulaireId,
+              saison.club.trim(),
+              saison.categorie.trim(),
+              saison.division,
+              saison.periode || null,
+              saison.mi_saison ? 1 : 0,
+              saison.periode_type || null,
+              saison.logo_club,
+              saison.logo_division,
+              saison.badge_capitanat ? 1 : 0,
+              saison.badge_surclasse ? 1 : 0,
+              saison.badge_champion ? 1 : 0,
+              saison.badge_coupe_remportee ? 1 : 0,
+              saison.matchs ?? null,
+              saison.buts ?? null,
+              saison.passes_decisives ?? null,
+              saison.temps_jeu_moyen ?? null,
+              saison.clean_sheets ?? null,
+              saison.saison_actuelle ? 1 : 0,
+              saison.ordre ?? index
+            );
+          });
+        }
+
+        if (body.formations && body.formations.length > 0) {
+          const insertFormation = db.prepare(`
+            INSERT INTO formations (
+              formulaire_joueur_id, annee_ou_periode, titre_structure, details, ordre
+            ) VALUES (?, ?, ?, ?, ?)
+          `);
+
+          body.formations.forEach((formation: CreateFormationDto, index: number) => {
+            insertFormation.run(
+              formulaireId,
+              formation.annee_ou_periode.trim(),
+              formation.titre_structure.trim(),
+              formation.details?.trim() || null,
+              formation.ordre ?? index
+            );
+          });
+        }
+
+        if (body.interets && body.interets.length > 0) {
+          const insertInteret = db.prepare(`
+            INSERT INTO interets (
+              formulaire_joueur_id, club, annee, logo_club, ordre
+            ) VALUES (?, ?, ?, ?, ?)
+          `);
+
+          body.interets.forEach((interet: CreateInteretDto, index: number) => {
+            insertInteret.run(
+              formulaireId,
+              interet.club.trim(),
+              interet.annee.trim(),
+              interet.logo_club,
+              interet.ordre ?? index
+            );
+          });
+        }
+
+        const formulaire = db.prepare('SELECT * FROM formulaires_joueur WHERE id = ?').get(formulaireId);
+        const qualites = db.prepare('SELECT * FROM qualites WHERE formulaire_joueur_id = ? ORDER BY ordre').all(formulaireId);
+        const saisons = db.prepare('SELECT * FROM saisons WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+          .all(formulaireId)
+          .map((saison: any) => ({
+            ...saison,
+            badge_capitanat: Boolean(saison.badge_capitanat),
+            badge_surclasse: Boolean(saison.badge_surclasse),
+            badge_champion: Boolean(saison.badge_champion),
+            badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
+            mi_saison: Boolean(saison.mi_saison),
+            saison_actuelle: Boolean(saison.saison_actuelle),
+          }));
+        const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+          .all(formulaireId);
+        const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
+          .all(formulaireId);
+
+        if (!formulaire || typeof formulaire !== 'object') {
+          throw new Error('Formulaire non trouvé après création');
+        }
+
+        const formulaireData = formulaire as Record<string, any>;
+        return {
+          ...formulaireData,
+          archive: Boolean(formulaireData.archive),
+          qualites,
+          saisons,
+          formations,
+          interets
+        };
+      } catch (dbError: any) {
+        console.error('Erreur dans la transaction de base de données:', dbError);
+        throw dbError;
       }
-
-      if (body.saisons && body.saisons.length > 0) {
-        const insertSaison = db.prepare(`
-          INSERT INTO saisons (
-            formulaire_joueur_id, club, categorie, division, periode, mi_saison, periode_type, logo_club, logo_division,
-            badge_capitanat, badge_surclasse, badge_champion, badge_coupe_remportee,
-            matchs, buts, passes_decisives, temps_jeu_moyen, clean_sheets, saison_actuelle, ordre
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        body.saisons.forEach((saison: CreateSaisonDto, index: number) => {
-          insertSaison.run(
-            formulaireId,
-            saison.club.trim(),
-            saison.categorie.trim(),
-            saison.division,
-            saison.periode || null,
-            saison.mi_saison ? 1 : 0,
-            saison.periode_type || null,
-            saison.logo_club,
-            saison.logo_division,
-            saison.badge_capitanat ? 1 : 0,
-            saison.badge_surclasse ? 1 : 0,
-            saison.badge_champion ? 1 : 0,
-            saison.badge_coupe_remportee ? 1 : 0,
-            saison.matchs ?? null,
-            saison.buts ?? null,
-            saison.passes_decisives ?? null,
-            saison.temps_jeu_moyen ?? null,
-            saison.clean_sheets ?? null,
-            saison.saison_actuelle ? 1 : 0,
-            saison.ordre ?? index
-          );
-        });
-      }
-
-      if (body.formations && body.formations.length > 0) {
-        const insertFormation = db.prepare(`
-          INSERT INTO formations (
-            formulaire_joueur_id, annee_ou_periode, titre_structure, details, ordre
-          ) VALUES (?, ?, ?, ?, ?)
-        `);
-
-        body.formations.forEach((formation: CreateFormationDto, index: number) => {
-          insertFormation.run(
-            formulaireId,
-            formation.annee_ou_periode.trim(),
-            formation.titre_structure.trim(),
-            formation.details?.trim() || null,
-            formation.ordre ?? index
-          );
-        });
-      }
-
-      if (body.interets && body.interets.length > 0) {
-        const insertInteret = db.prepare(`
-          INSERT INTO interets (
-            formulaire_joueur_id, club, annee, logo_club, ordre
-          ) VALUES (?, ?, ?, ?, ?)
-        `);
-
-        body.interets.forEach((interet: CreateInteretDto, index: number) => {
-          insertInteret.run(
-            formulaireId,
-            interet.club.trim(),
-            interet.annee.trim(),
-            interet.logo_club,
-            interet.ordre ?? index
-          );
-        });
-      }
-
-      const formulaire = db.prepare('SELECT * FROM formulaires_joueur WHERE id = ?').get(formulaireId);
-      const qualites = db.prepare('SELECT * FROM qualites WHERE formulaire_joueur_id = ? ORDER BY ordre').all(formulaireId);
-      const saisons = db.prepare('SELECT * FROM saisons WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
-        .all(formulaireId)
-        .map((saison: any) => ({
-          ...saison,
-          badge_capitanat: Boolean(saison.badge_capitanat),
-          badge_surclasse: Boolean(saison.badge_surclasse),
-          badge_champion: Boolean(saison.badge_champion),
-          badge_coupe_remportee: Boolean(saison.badge_coupe_remportee),
-          mi_saison: Boolean(saison.mi_saison),
-          saison_actuelle: Boolean(saison.saison_actuelle),
-        }));
-      const formations = db.prepare('SELECT * FROM formations WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
-        .all(formulaireId);
-      const interets = db.prepare('SELECT * FROM interets WHERE formulaire_joueur_id = ? ORDER BY ordre, created_at')
-        .all(formulaireId);
-
-      if (!formulaire || typeof formulaire !== 'object') {
-        throw new Error('Formulaire non trouvé après création');
-      }
-
-      const formulaireData = formulaire as Record<string, any>;
-      return { 
-        ...formulaireData, 
-        archive: Boolean(formulaireData.archive),
-        qualites, 
-        saisons, 
-        formations, 
-        interets 
-      };
     });
 
     const formulaireAvecQualites = insertFormulaire();
@@ -488,8 +494,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Erreur lors de la création du formulaire:', error);
+    console.error('Stack trace:', error.stack);
+    
+    const errorMessage = error?.message || 'Erreur lors de la création du formulaire';
+    const errorDetails = error?.toString ? error.toString() : String(error);
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur lors de la création du formulaire' },
+      { 
+        success: false, 
+        error: errorMessage,
+        details: errorDetails
+      },
       { status: 500 }
     );
   }

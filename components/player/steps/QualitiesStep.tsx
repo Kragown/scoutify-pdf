@@ -57,7 +57,7 @@ export function QualitiesStep() {
     // Ajoute une qualité personnalisée
     const handleAddCustomQuality = (): void => {
         const trimmed = customQualityInput.trim();
-        
+
         // Vérification : max 24 caractères
         if (trimmed.length === 0) {
             return;
@@ -100,7 +100,7 @@ export function QualitiesStep() {
             {/* ========== SECTION 1: QUALITÉS PRÉDÉFINIES ========== */}
             <div className="space-y-6">
                 <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-white">Qualités Sportives</h2>
+                    <h2 className="text-2xl font-bold text-white">Qualités Sportives <span className="text-red-500">*</span></h2>
                     <p className="text-sm text-scout-muted">
                         Sélectionnez vos points forts ({selectedCount}/6)
                     </p>
@@ -125,8 +125,8 @@ export function QualitiesStep() {
                                         isSelected
                                             ? "bg-scout-orange text-black border-scout-orange shadow-[0_0_10px_rgba(212,175,55,0.5)]"
                                             : isDisabled
-                                            ? "bg-black/20 text-white/30 border-white/5 cursor-not-allowed"
-                                            : "bg-black/40 text-white/60 border-white/10 hover:border-white/40 hover:text-white hover:bg-white/5 cursor-pointer"
+                                                ? "bg-black/20 text-white/30 border-white/5 cursor-not-allowed"
+                                                : "bg-black/40 text-white/60 border-white/10 hover:border-white/40 hover:text-white hover:bg-white/5 cursor-pointer"
                                     )}
                                 >
                                     {quality}

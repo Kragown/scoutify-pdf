@@ -32,6 +32,7 @@ export const physicalSchema = z.object({
 
 // Position Schema
 export const positionSchema = z.object({
+    formation: z.enum(["3-5-2", "4-3-3"], { message: "Sélectionnez une formation" }),
     primaryPosition: z.string().min(2, "Sélectionnez un poste principal"),
     secondaryPosition: z.string().optional(),
 });
@@ -61,6 +62,8 @@ export const careerStepSchema = z.object({
     badge_surclasse: z.boolean().optional(),
     badge_champion: z.boolean().optional(),
     badge_coupe_remportee: z.boolean().optional(),
+    mi_saison: z.boolean().optional(),
+    periode_type: z.string().nullable().optional(),
     matchs: z.number().nullable().optional(),
     buts: z.number().nullable().optional(),
     passes_decisives: z.number().nullable().optional(),

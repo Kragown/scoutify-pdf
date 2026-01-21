@@ -17,7 +17,7 @@ const interestsFormSchema = z.object({
 type InterestsFormData = z.infer<typeof interestsFormSchema>;
 
 export function InterestsStep() {
-    const { data, updateData, setStep } = usePlayerStore();
+    const { data, updateData, setStep, reset } = usePlayerStore();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const router = useRouter();
 
@@ -40,6 +40,13 @@ export function InterestsStep() {
 
         // Fusion des données pour l'envoi final
         const finalData = { ...data, interets: formData.interets };
+
+        // Validation: vérifier que la photo est présente
+        if (!finalData.photoUrl || finalData.photoUrl.trim() === "") {
+            alert("⚠️ Photo manquante\n\nVeuillez retourner à l'étape 1 (Identité) et uploader une photo du joueur avant de finaliser votre CV.");
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             const payload = {
@@ -66,7 +73,7 @@ export function InterestsStep() {
                 // Mapping Saisons/Carrière
                 saisons: finalData.career?.map((c, index) => ({
                     club: c.club,
-                    categorie: `${c.category} (${c.year})`,
+                    categorie: c.category || "",
                     division: c.division,
                     logo_club: "/logos/default-club.png",
                     logo_division: "/logos/default-division.png",
@@ -103,20 +110,35 @@ export function InterestsStep() {
                 })) || []
             };
 
+            console.log("PAYLOAD SENT TO SERVER:", JSON.stringify(payload, null, 2));
+
             const response = await fetch('/api/formulaires-joueur', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 
-            const result = await response.json();
+            console.log("Response Status:", response.status);
+            const textResult = await response.text();
+            console.log("Raw Response:", textResult);
 
-            if (!response.ok) {
-                console.error("Erreur serveur:", result);
-                throw new Error(result.error || "Erreur lors de la sauvegarde.");
+            let result;
+            try {
+                result = JSON.parse(textResult);
+            } catch (e) {
+                console.error("JSON Parse Error:", e);
+                throw new Error("Erreur de communication avec le serveur (réponse invalide).");
             }
 
-            // Redirect to landing page
+            if (!response.ok) {
+                console.error("Erreur serveur (objet):", result);
+                const errorMsg = result.error || "Erreur lors de la sauvegarde.";
+                const errorDetails = result.details ? `\n\nDétails: ${result.details}` : "";
+                throw new Error(errorMsg + errorDetails);
+            }
+
+            // Reset data and Redirect to landing page
+            reset();
             router.push('/');
 
         } catch (error: any) {
@@ -156,7 +178,7 @@ export function InterestsStep() {
 
                         <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-2 space-y-1">
-                                <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Club / Essai</label>
+                                <label className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider">Club / Essai <span className="text-red-500">*</span></label>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
                                         <Heart className="w-5 h-5 text-white/30" />
@@ -173,7 +195,7 @@ export function InterestsStep() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Année</label>
+                                <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Année <span className="text-red-500">*</span></label>
                                 <select
                                     {...form.register(`interets.${index}.annee`)}
                                     className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] outline-none appearance-none text-center"
