@@ -1,7 +1,9 @@
 {
   "nom": "Dupont",
   "prenom": "Jean",
-  "nationalites": ["France"],
+  "nationalites": [
+    "France"
+  ],
   "date_naissance": "2000-05-15",
   "pied_fort": "Droit",
   "taille_cm": 175,

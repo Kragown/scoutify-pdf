@@ -1,7 +1,9 @@
 {
   "nom": "Ronaldo",
   "prenom": "Cristiano",
-  "nationalites": ["Portugal"],
+  "nationalites": [
+    "Portugal"
+  ],
   "date_naissance": "1985-02-05",
   "pied_fort": "Droit",
   "taille_cm": 187,

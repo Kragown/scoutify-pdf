@@ -1,7 +1,10 @@
 {
   "nom": "Messi",
   "prenom": "Lionel",
-  "nationalites": ["Argentine", "Espagne"],
+  "nationalites": [
+    "Argentine",
+    "Espagne"
+  ],
   "date_naissance": "1987-06-24",
   "pied_fort": "Gauche",
   "taille_cm": 170,

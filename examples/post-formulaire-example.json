@@ -1,11 +1,14 @@
 {
   "nom": "Mbappé",
   "prenom": "Kylian",
-  "nationalites": ["France"],
+  "nationalites": [
+    "France"
+  ],
   "date_naissance": "1998-12-20",
   "pied_fort": "Droit",
   "taille_cm": 178,
   "couleur_cv": "#1E5EFF",
+  "formation": "4-3-3",
   "poste_principal": "BU",
   "poste_secondaire": "AG",
   "url_transfermarkt": "https://www.transfermarkt.fr/kylian-mbappe/profil/spieler/342229",

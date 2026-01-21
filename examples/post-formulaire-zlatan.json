@@ -1,7 +1,10 @@
 {
   "nom": "Ibrahimović",
   "prenom": "Zlatan",
-  "nationalites": ["Suède", "Bosnie-Herzégovine"],
+  "nationalites": [
+    "Suède",
+    "Bosnie-Herzégovine"
+  ],
   "date_naissance": "1981-10-03",
   "pied_fort": "Droit",
   "taille_cm": 195,
