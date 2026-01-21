@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, Plus, X, Calendar } from "lucide-react";
-import { FormulaireJoueur, POSTES } from "@/lib/types";
+import { FormulaireJoueur, POSTES, CreateSaisonDto, DIVISIONS } from "@/lib/types";
 
 export default function EditFormulairePage() {
   const params = useParams();
@@ -12,10 +12,13 @@ export default function EditFormulairePage() {
 
   const [formulaire, setFormulaire] = useState<FormulaireJoueur | null>(null);
   const [qualites, setQualites] = useState<string[]>([]);
+  const [saisons, setSaisons] = useState<CreateSaisonDto[]>([]);
   const [nationalites, setNationalites] = useState<string[]>([]);
   const [newNationalite, setNewNationalite] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [logoPreviews, setLogoPreviews] = useState<Record<string, string>>({});
+  const [uploadingLogos, setUploadingLogos] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +34,38 @@ export default function EditFormulairePage() {
           setFormulaire(data.data);
           const qualitesArray = data.data.qualites?.map((q: any) => q.libelle) || [];
           setQualites(qualitesArray);
+          const saisonsArray = data.data.saisons?.map((s: any) => ({
+            club: s.club || '',
+            categorie: s.categorie || '',
+            division: s.division || 'Autre',
+            periode: s.periode || null,
+            mi_saison: s.mi_saison || false,
+            periode_type: s.periode_type || null,
+            logo_club: s.logo_club || '',
+            logo_division: s.logo_division || '',
+            badge_capitanat: s.badge_capitanat || false,
+            badge_surclasse: s.badge_surclasse || false,
+            badge_champion: s.badge_champion || false,
+            badge_coupe_remportee: s.badge_coupe_remportee || false,
+            matchs: s.matchs || null,
+            buts: s.buts || null,
+            passes_decisives: s.passes_decisives || null,
+            temps_jeu_moyen: s.temps_jeu_moyen || null,
+            saison_actuelle: s.saison_actuelle || false,
+            ordre: s.ordre || 0,
+          })) || [];
+          setSaisons(saisonsArray);
+          // Initialiser les prévisualisations des logos
+          const logoPreviewsMap: Record<string, string> = {};
+          saisonsArray.forEach((s: any, index: number) => {
+            if (s.logo_club) {
+              logoPreviewsMap[`${index}-club`] = s.logo_club;
+            }
+            if (s.logo_division) {
+              logoPreviewsMap[`${index}-division`] = s.logo_division;
+            }
+          });
+          setLogoPreviews(logoPreviewsMap);
           let nationalitesArray: string[] = [];
           if (data.data.nationalites) {
             try {
@@ -124,6 +159,10 @@ export default function EditFormulairePage() {
           status: formulaire.status,
           archive: formulaire.archive,
           qualites: validQualites,
+          saisons: saisons.map((s, index) => ({
+            ...s,
+            ordre: index,
+          })),
         }),
       });
 
@@ -198,6 +237,55 @@ export default function EditFormulairePage() {
       e.preventDefault();
       addNationalite();
     }
+  };
+
+  const addSaison = () => {
+    setSaisons([...saisons, {
+      club: '',
+      categorie: '',
+      division: 'Autre',
+      periode: null,
+      mi_saison: false,
+      periode_type: null,
+      logo_club: '',
+      logo_division: '',
+      badge_capitanat: false,
+      badge_surclasse: false,
+      badge_champion: false,
+      badge_coupe_remportee: false,
+      matchs: null,
+      buts: null,
+      passes_decisives: null,
+      temps_jeu_moyen: null,
+      saison_actuelle: false,
+      ordre: saisons.length,
+    }]);
+  };
+
+  const removeSaison = (index: number) => {
+    setSaisons(saisons.filter((_, i) => i !== index));
+    // Supprimer les prévisualisations associées
+    const newPreviews = { ...logoPreviews };
+    delete newPreviews[`${index}-club`];
+    delete newPreviews[`${index}-division`];
+    // Réindexer les prévisualisations pour les saisons suivantes
+    const updatedPreviews: Record<string, string> = {};
+    Object.keys(newPreviews).forEach((key) => {
+      const [oldIndex, type] = key.split('-');
+      const oldIdx = parseInt(oldIndex);
+      if (oldIdx > index) {
+        updatedPreviews[`${oldIdx - 1}-${type}`] = newPreviews[key];
+      } else if (oldIdx < index) {
+        updatedPreviews[key] = newPreviews[key];
+      }
+    });
+    setLogoPreviews(updatedPreviews);
+  };
+
+  const updateSaison = (index: number, field: keyof CreateSaisonDto, value: any) => {
+    const newSaisons = [...saisons];
+    newSaisons[index] = { ...newSaisons[index], [field]: value };
+    setSaisons(newSaisons);
   };
 
   const cropImageToPortrait = (file: File): Promise<File> => {
@@ -322,6 +410,55 @@ export default function EditFormulairePage() {
     const url = e.target.value;
     handleChange("photo_joueur", url);
     setPhotoPreview(url || null);
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, saisonIndex: number, logoType: 'club' | 'division') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError("Le fichier doit être une image");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("L'image ne doit pas dépasser 5MB");
+        return;
+      }
+
+      const key = `${saisonIndex}-${logoType}`;
+      setUploadingLogos({ ...uploadingLogos, [key]: true });
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', 'logo');
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          updateSaison(saisonIndex, logoType === 'club' ? 'logo_club' : 'logo_division', data.path);
+          setLogoPreviews({ ...logoPreviews, [key]: data.path });
+          setError(null);
+        } else {
+          setError(data.error || "Erreur lors de l'upload de l'image");
+        }
+      } catch (err) {
+        setError("Erreur lors de l'upload de l'image");
+        console.error(err);
+      } finally {
+        setUploadingLogos({ ...uploadingLogos, [key]: false });
+      }
+    }
+  };
+
+  const handleLogoUrlChange = (e: React.ChangeEvent<HTMLInputElement>, saisonIndex: number, logoType: 'club' | 'division') => {
+    const url = e.target.value;
+    const key = `${saisonIndex}-${logoType}`;
+    updateSaison(saisonIndex, logoType === 'club' ? 'logo_club' : 'logo_division', url);
+    setLogoPreviews({ ...logoPreviews, [key]: url || '' });
   };
 
   if (loading) {
@@ -807,6 +944,402 @@ export default function EditFormulairePage() {
                 <p className="text-white/60 text-xs mt-2">
                   {qualites.length}/6 qualités • Maximum 24 caractères par qualité
                 </p>
+              </div>
+            </div>
+
+            {/* Carrière (Saisons) */}
+            <div className="bg-scout-card border border-white/10 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wide border-b border-white/10 pb-3 flex-1">
+                  Carrière
+                </h2>
+                <button
+                  type="button"
+                  onClick={addSaison}
+                  className="bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter une saison
+                </button>
+              </div>
+              <div className="space-y-6">
+                {saisons.map((saison, index) => (
+                  <div key={index} className="border border-white/10 rounded-lg p-4 bg-black/20">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-white font-bold uppercase tracking-wide">Saison {index + 1}</h3>
+                      <button
+                        type="button"
+                        onClick={() => removeSaison(index)}
+                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Supprimer cette saison"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Club *
+                        </label>
+                        <input
+                          type="text"
+                          value={saison.club}
+                          onChange={(e) => updateSaison(index, 'club', e.target.value)}
+                          required
+                          className="input-field"
+                          placeholder="Nom du club"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Catégorie *
+                        </label>
+                        <div className="flex items-center gap-4">
+                          <select
+                            value={saison.categorie.replace(' National', '')}
+                            onChange={(e) => {
+                              const baseCategorie = e.target.value;
+                              const currentCategorie = saison.categorie;
+                              const isNational = currentCategorie.includes(' National');
+                              updateSaison(index, 'categorie', isNational ? `${baseCategorie} National` : baseCategorie);
+                            }}
+                            required
+                            className="input-field flex-1"
+                          >
+                            <option value="">Sélectionner une catégorie</option>
+                            {['U20', 'U19', 'U18', 'U17', 'U16', 'U15', 'U14', 'U13'].map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                          <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={saison.categorie.includes(' National')}
+                              onChange={(e) => {
+                                const baseCategorie = saison.categorie.replace(' National', '');
+                                updateSaison(index, 'categorie', e.target.checked ? `${baseCategorie} National` : baseCategorie);
+                              }}
+                              className="w-5 h-5 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                            />
+                            <span className="text-white/80 text-sm font-bold uppercase tracking-wide">
+                              National
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Division *
+                        </label>
+                        <select
+                          value={saison.division}
+                          onChange={(e) => updateSaison(index, 'division', e.target.value)}
+                          required
+                          className="input-field"
+                        >
+                          {DIVISIONS.map((div) => (
+                            <option key={div} value={div}>
+                              {div}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Période
+                        </label>
+                        <select
+                          value={saison.periode || ''}
+                          onChange={(e) => updateSaison(index, 'periode', e.target.value || null)}
+                          className="input-field"
+                        >
+                          <option value="">Sélectionner une période</option>
+                          {['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026'].map((periode) => (
+                            <option key={periode} value={periode}>
+                              {periode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={saison.mi_saison || false}
+                            onChange={(e) => updateSaison(index, 'mi_saison', e.target.checked)}
+                            className="w-5 h-5 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                          />
+                          <span className="text-white/80 text-sm font-bold uppercase tracking-wide">
+                            Mi-saison
+                          </span>
+                        </label>
+                        {saison.mi_saison && (
+                          <select
+                            value={saison.periode_type || ''}
+                            onChange={(e) => updateSaison(index, 'periode_type', e.target.value || null)}
+                            className="input-field"
+                          >
+                            <option value="">Sélectionner</option>
+                            <option value="Hiver">Hiver</option>
+                            <option value="Été">Été</option>
+                          </select>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={saison.saison_actuelle || false}
+                            onChange={(e) => updateSaison(index, 'saison_actuelle', e.target.checked)}
+                            className="w-5 h-5 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                          />
+                          <span className="text-white/80 text-sm font-bold uppercase tracking-wide">
+                            Saison actuelle
+                          </span>
+                        </label>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Logo Club
+                        </label>
+                        <div className="space-y-4">
+                          {/* Prévisualisation Logo Club */}
+                          {logoPreviews[`${index}-club`] && (
+                            <div className="relative w-full max-w-xs">
+                              <img
+                                src={logoPreviews[`${index}-club`]}
+                                alt="Logo du club"
+                                className="w-24 h-24 object-contain rounded-lg border border-white/10 bg-white/5 p-2"
+                                onError={() => {
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`${index}-club`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateSaison(index, 'logo_club', '');
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`${index}-club`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                                title="Supprimer le logo"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* Upload de fichier */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Télécharger une image
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleLogoUpload(e, index, 'club')}
+                                disabled={uploadingLogos[`${index}-club`]}
+                                className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600 file:cursor-pointer file:transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              {uploadingLogos[`${index}-club`] && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <Loader2 className="w-5 h-5 text-scout-orange animate-spin" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-white/40 text-xs mt-1">Formats acceptés: JPG, PNG, GIF • Max 5MB</p>
+                          </div>
+
+                          {/* Ou URL */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Ou entrer une URL ou un chemin
+                            </label>
+                            <input
+                              type="text"
+                              value={saison.logo_club?.startsWith('data:') ? '' : (saison.logo_club || '')}
+                              onChange={(e) => handleLogoUrlChange(e, index, 'club')}
+                              className="input-field"
+                              placeholder="https://example.com/logo.jpg ou /logos/club.jpg"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Logo Division
+                        </label>
+                        <div className="space-y-4">
+                          {/* Prévisualisation Logo Division */}
+                          {logoPreviews[`${index}-division`] && (
+                            <div className="relative w-full max-w-xs">
+                              <img
+                                src={logoPreviews[`${index}-division`]}
+                                alt="Logo de la division"
+                                className="w-24 h-24 object-contain rounded-lg border border-white/10 bg-white/5 p-2"
+                                onError={() => {
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`${index}-division`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateSaison(index, 'logo_division', '');
+                                  const newPreviews = { ...logoPreviews };
+                                  delete newPreviews[`${index}-division`];
+                                  setLogoPreviews(newPreviews);
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                                title="Supprimer le logo"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* Upload de fichier */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Télécharger une image
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleLogoUpload(e, index, 'division')}
+                                disabled={uploadingLogos[`${index}-division`]}
+                                className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600 file:cursor-pointer file:transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              {uploadingLogos[`${index}-division`] && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <Loader2 className="w-5 h-5 text-scout-orange animate-spin" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-white/40 text-xs mt-1">Formats acceptés: JPG, PNG, GIF • Max 5MB</p>
+                          </div>
+
+                          {/* Ou URL */}
+                          <div>
+                            <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
+                              Ou entrer une URL ou un chemin
+                            </label>
+                            <input
+                              type="text"
+                              value={saison.logo_division?.startsWith('data:') ? '' : (saison.logo_division || '')}
+                              onChange={(e) => handleLogoUrlChange(e, index, 'division')}
+                              className="input-field"
+                              placeholder="https://example.com/logo.jpg ou /logos/division.jpg"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Badges
+                        </label>
+                        <div className="flex flex-wrap gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={saison.badge_capitanat || false}
+                              onChange={(e) => updateSaison(index, 'badge_capitanat', e.target.checked)}
+                              className="w-4 h-4 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                            />
+                            <span className="text-white/60 text-sm">Capitaine</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={saison.badge_surclasse || false}
+                              onChange={(e) => updateSaison(index, 'badge_surclasse', e.target.checked)}
+                              className="w-4 h-4 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                            />
+                            <span className="text-white/60 text-sm">Surclassé</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={saison.badge_champion || false}
+                              onChange={(e) => updateSaison(index, 'badge_champion', e.target.checked)}
+                              className="w-4 h-4 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                            />
+                            <span className="text-white/60 text-sm">Champion</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={saison.badge_coupe_remportee || false}
+                              onChange={(e) => updateSaison(index, 'badge_coupe_remportee', e.target.checked)}
+                              className="w-4 h-4 rounded border-white/20 bg-scout-card text-scout-orange focus:ring-scout-orange focus:ring-2"
+                            />
+                            <span className="text-white/60 text-sm">Coupe remportée</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Matchs
+                        </label>
+                        <input
+                          type="number"
+                          value={saison.matchs || ''}
+                          onChange={(e) => updateSaison(index, 'matchs', e.target.value ? parseInt(e.target.value) : null)}
+                          className="input-field"
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Buts
+                        </label>
+                        <input
+                          type="number"
+                          value={saison.buts || ''}
+                          onChange={(e) => updateSaison(index, 'buts', e.target.value ? parseInt(e.target.value) : null)}
+                          className="input-field"
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Passes décisives
+                        </label>
+                        <input
+                          type="number"
+                          value={saison.passes_decisives || ''}
+                          onChange={(e) => updateSaison(index, 'passes_decisives', e.target.value ? parseInt(e.target.value) : null)}
+                          className="input-field"
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Temps de jeu moyen (min)
+                        </label>
+                        <input
+                          type="number"
+                          value={saison.temps_jeu_moyen || ''}
+                          onChange={(e) => updateSaison(index, 'temps_jeu_moyen', e.target.value ? parseInt(e.target.value) : null)}
+                          className="input-field"
+                          min="1"
+                          max="90"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {saisons.length === 0 && (
+                  <p className="text-white/40 text-sm italic">Aucune saison. Cliquez sur "Ajouter une saison" pour en ajouter une.</p>
+                )}
               </div>
             </div>
 
