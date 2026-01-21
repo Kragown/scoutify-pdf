@@ -14,7 +14,6 @@ export default function StaffPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openActionsMenu, setOpenActionsMenu] = useState<number | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
-  const [generatingPdfId, setGeneratingPdfId] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -95,35 +94,6 @@ export default function StaffPage() {
   const getFilterLabel = () => {
     if (statusFilter === null) return "Tous les statuts";
     return statusFilter;
-  };
-
-  const generatePDF = async (formulaireId: number) => {
-    setGeneratingPdfId(formulaireId);
-    try {
-      const response = await fetch(`/api/formulaires-joueur/${formulaireId}/pdf`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.error || "Erreur lors de la génération du PDF");
-        return;
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `CV_${formulaires.find(f => f.id === formulaireId)?.prenom}_${formulaires.find(f => f.id === formulaireId)?.nom}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      setOpenActionsMenu(null);
-    } catch (err) {
-      setError("Erreur lors de la génération du PDF");
-      console.error(err);
-    } finally {
-      setGeneratingPdfId(null);
-    }
   };
 
   const duplicateFormulaire = async (formulaireId: number) => {
@@ -472,25 +442,6 @@ export default function StaffPage() {
                                       >
                                         <Eye className="w-4 h-4" />
                                         Editer
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          generatePDF(formulaire.id!);
-                                        }}
-                                        disabled={generatingPdfId === formulaire.id}
-                                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-2 border-t border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      >
-                                        {generatingPdfId === formulaire.id ? (
-                                          <>
-                                            <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
-                                            Génération...
-                                          </>
-                                        ) : (
-                                          <>
-                                            <FileText className="w-4 h-4" />
-                                            Générer CV
-                                          </>
-                                        )}
                                       </button>
                                       <button
                                         onClick={() => {
