@@ -1299,30 +1299,47 @@ export default function EditFormulairePage() {
                           min="0"
                         />
                       </div>
-                      <div>
-                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
-                          Buts
-                        </label>
-                        <input
-                          type="number"
-                          value={saison.buts || ''}
-                          onChange={(e) => updateSaison(index, 'buts', e.target.value ? parseInt(e.target.value) : null)}
-                          className="input-field"
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
-                          Passes décisives
-                        </label>
-                        <input
-                          type="number"
-                          value={saison.passes_decisives || ''}
-                          onChange={(e) => updateSaison(index, 'passes_decisives', e.target.value ? parseInt(e.target.value) : null)}
-                          className="input-field"
-                          min="0"
-                        />
-                      </div>
+                      {(formulaire.poste_principal === 'GB' || formulaire.poste_secondaire === 'GB') ? (
+                        <div>
+                          <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                            Clean sheets
+                          </label>
+                          <input
+                            type="number"
+                            value={saison.clean_sheets || ''}
+                            onChange={(e) => updateSaison(index, 'clean_sheets', e.target.value ? parseInt(e.target.value) : null)}
+                            className="input-field"
+                            min="0"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <div>
+                            <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                              Buts
+                            </label>
+                            <input
+                              type="number"
+                              value={saison.buts || ''}
+                              onChange={(e) => updateSaison(index, 'buts', e.target.value ? parseInt(e.target.value) : null)}
+                              className="input-field"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                              Passes décisives
+                            </label>
+                            <input
+                              type="number"
+                              value={saison.passes_decisives || ''}
+                              onChange={(e) => updateSaison(index, 'passes_decisives', e.target.value ? parseInt(e.target.value) : null)}
+                              className="input-field"
+                              min="0"
+                            />
+                          </div>
+                        </>
+                      )}
                       <div>
                         <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
                           Temps de jeu moyen (min)
@@ -1334,18 +1351,6 @@ export default function EditFormulairePage() {
                           className="input-field"
                           min="1"
                           max="90"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
-                          Clean sheets
-                        </label>
-                        <input
-                          type="number"
-                          value={saison.clean_sheets || ''}
-                          onChange={(e) => updateSaison(index, 'clean_sheets', e.target.value ? parseInt(e.target.value) : null)}
-                          className="input-field"
-                          min="0"
                         />
                       </div>
                     </div>

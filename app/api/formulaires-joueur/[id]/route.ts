@@ -280,13 +280,6 @@ export async function PUT(
         );
       }
       
-      if (body.formations.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Au moins une formation est requise' },
-          { status: 400 }
-        );
-      }
-      
       for (let i = 0; i < body.formations.length; i++) {
         const formation = body.formations[i];
         
@@ -333,13 +326,6 @@ export async function PUT(
       if (!Array.isArray(body.interets)) {
         return NextResponse.json(
           { success: false, error: 'Les intérêts doivent être un tableau' },
-          { status: 400 }
-        );
-      }
-      
-      if (body.interets.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Au moins un intérêt est requis' },
           { status: 400 }
         );
       }
