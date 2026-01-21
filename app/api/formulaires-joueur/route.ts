@@ -393,8 +393,8 @@ export async function POST(request: NextRequest) {
           INSERT INTO saisons (
             formulaire_joueur_id, club, categorie, division, periode, mi_saison, periode_type, logo_club, logo_division,
             badge_capitanat, badge_surclasse, badge_champion, badge_coupe_remportee,
-            matchs, buts, passes_decisives, temps_jeu_moyen, saison_actuelle, ordre
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            matchs, buts, passes_decisives, temps_jeu_moyen, clean_sheets, saison_actuelle, ordre
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
         body.saisons.forEach((saison: CreateSaisonDto, index: number) => {
@@ -416,6 +416,7 @@ export async function POST(request: NextRequest) {
             saison.buts ?? null,
             saison.passes_decisives ?? null,
             saison.temps_jeu_moyen ?? null,
+            saison.clean_sheets ?? null,
             saison.saison_actuelle ? 1 : 0,
             saison.ordre ?? index
           );

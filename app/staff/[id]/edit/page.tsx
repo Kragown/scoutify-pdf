@@ -51,6 +51,7 @@ export default function EditFormulairePage() {
             buts: s.buts || null,
             passes_decisives: s.passes_decisives || null,
             temps_jeu_moyen: s.temps_jeu_moyen || null,
+            clean_sheets: s.clean_sheets || null,
             saison_actuelle: s.saison_actuelle || false,
             ordre: s.ordre || 0,
           })) || [];
@@ -257,6 +258,7 @@ export default function EditFormulairePage() {
       buts: null,
       passes_decisives: null,
       temps_jeu_moyen: null,
+      clean_sheets: null,
       saison_actuelle: false,
       ordre: saisons.length,
     }]);
@@ -1332,6 +1334,18 @@ export default function EditFormulairePage() {
                           className="input-field"
                           min="1"
                           max="90"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-white/80 text-sm font-bold mb-2 uppercase tracking-wide">
+                          Clean sheets
+                        </label>
+                        <input
+                          type="number"
+                          value={saison.clean_sheets || ''}
+                          onChange={(e) => updateSaison(index, 'clean_sheets', e.target.value ? parseInt(e.target.value) : null)}
+                          className="input-field"
+                          min="0"
                         />
                       </div>
                     </div>

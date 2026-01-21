@@ -132,6 +132,16 @@ try {
   }
 }
 
+try {
+  db.exec(`
+    ALTER TABLE saisons ADD COLUMN clean_sheets INTEGER;
+  `);
+} catch (error: any) {
+  if (!error.message.includes('duplicate column name')) {
+    console.warn('Erreur lors de l\'ajout de la colonne clean_sheets:', error.message);
+  }
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS qualites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

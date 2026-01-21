@@ -114,6 +114,7 @@ export interface Saison {
   buts?: number | null;
   passes_decisives?: number | null;
   temps_jeu_moyen?: number | null;
+  clean_sheets?: number | null;
   saison_actuelle: boolean; // Pour savoir si c'est la saison en cours
   ordre: number;
   created_at?: string;
@@ -137,6 +138,7 @@ export interface CreateSaisonDto {
   buts?: number | null;
   passes_decisives?: number | null;
   temps_jeu_moyen?: number | null; // 1 à 90
+  clean_sheets?: number | null;
   saison_actuelle?: boolean;
   ordre?: number;
 }
