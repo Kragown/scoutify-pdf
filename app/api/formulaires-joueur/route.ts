@@ -53,10 +53,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body: CreateFormulaireJoueurDto = await request.json();
-
-    if (!body.nom || !body.prenom || !body.nationalites || !body.date_naissance ||
-      !body.pied_fort || !body.taille_cm || !body.couleur_cv ||
-      !body.poste_principal || !body.photo_joueur || !body.email || !body.telephone) {
+    
+    if (!body.nom || !body.prenom || !body.nationalites || !body.date_naissance || 
+        !body.pied_fort || !body.taille_cm || !body.couleur_cv || 
+        !body.poste_principal || body.photo_joueur === undefined || body.photo_joueur === null || !body.email || !body.telephone) {
       return NextResponse.json(
         { success: false, error: 'Tous les champs obligatoires doivent être remplis' },
         { status: 400 }
@@ -187,15 +187,15 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-
-        if (!saison.logo_club || typeof saison.logo_club !== 'string' || saison.logo_club.trim().length === 0) {
+        
+        if (saison.logo_club === undefined || saison.logo_club === null || typeof saison.logo_club !== 'string') {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le logo du club est obligatoire` },
             { status: 400 }
           );
         }
-
-        if (!saison.logo_division || typeof saison.logo_division !== 'string' || saison.logo_division.trim().length === 0) {
+        
+        if (saison.logo_division === undefined || saison.logo_division === null || typeof saison.logo_division !== 'string') {
           return NextResponse.json(
             { success: false, error: `La saison ${i + 1}: le logo de la division est obligatoire` },
             { status: 400 }
@@ -316,8 +316,8 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-
-        if (!interet.logo_club || typeof interet.logo_club !== 'string' || interet.logo_club.trim().length === 0) {
+        
+        if (interet.logo_club === undefined || interet.logo_club === null || typeof interet.logo_club !== 'string') {
           return NextResponse.json(
             { success: false, error: `L'intérêt ${i + 1}: le logo du club est obligatoire` },
             { status: 400 }
