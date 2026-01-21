@@ -21,10 +21,28 @@ export default function EditFormulairePage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [logoPreviews, setLogoPreviews] = useState<Record<string, string>>({});
   const [uploadingLogos, setUploadingLogos] = useState<Record<string, boolean>>({});
+  const [availableLogos, setAvailableLogos] = useState<Array<{ filename: string; path: string }>>([]);
+  const [logoSelectorTarget, setLogoSelectorTarget] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const response = await fetch('/api/logos');
+        const data = await response.json();
+        if (data.success) {
+          setAvailableLogos(data.logos);
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des logos:', err);
+      }
+    };
+
+    fetchLogos();
+  }, []);
 
   useEffect(() => {
     const fetchFormulaire = async () => {
@@ -422,6 +440,28 @@ export default function EditFormulairePage() {
     const key = `interet-${interetIndex}`;
     updateInteret(interetIndex, 'logo_club', url);
     setLogoPreviews({ ...logoPreviews, [key]: url || '' });
+  };
+
+  const handleLogoSelect = (logoPath: string) => {
+    if (!logoSelectorTarget) return;
+
+    // Déterminer le type de logo et l'index
+    if (logoSelectorTarget.startsWith('interet-')) {
+      const index = parseInt(logoSelectorTarget.split('-')[1]);
+      updateInteret(index, 'logo_club', logoPath);
+      setLogoPreviews({ ...logoPreviews, [`interet-${index}`]: logoPath });
+    } else {
+      const [indexStr, type] = logoSelectorTarget.split('-');
+      const index = parseInt(indexStr);
+      if (type === 'club') {
+        updateSaison(index, 'logo_club', logoPath);
+        setLogoPreviews({ ...logoPreviews, [`${index}-club`]: logoPath });
+      } else if (type === 'division') {
+        updateSaison(index, 'logo_division', logoPath);
+        setLogoPreviews({ ...logoPreviews, [`${index}-division`]: logoPath });
+      }
+    }
+    setLogoSelectorTarget(null);
   };
 
   const cropImageToPortrait = (file: File): Promise<File> => {
@@ -1270,10 +1310,21 @@ export default function EditFormulairePage() {
                             </div>
                           )}
                           
+                          {/* Sélectionner un logo existant */}
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => setLogoSelectorTarget(`${index}-club`)}
+                              className="w-full bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all text-sm"
+                            >
+                              Sélectionner un logo existant
+                            </button>
+                          </div>
+
                           {/* Upload de fichier */}
                           <div>
                             <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
-                              Télécharger une image
+                              Télécharger une nouvelle image
                             </label>
                             <div className="relative">
                               <input
@@ -1341,10 +1392,21 @@ export default function EditFormulairePage() {
                             </div>
                           )}
                           
+                          {/* Sélectionner un logo existant */}
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => setLogoSelectorTarget(`${index}-division`)}
+                              className="w-full bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all text-sm"
+                            >
+                              Sélectionner un logo existant
+                            </button>
+                          </div>
+
                           {/* Upload de fichier */}
                           <div>
                             <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
-                              Télécharger une image
+                              Télécharger une nouvelle image
                             </label>
                             <div className="relative">
                               <input
@@ -1680,10 +1742,21 @@ export default function EditFormulairePage() {
                             </div>
                           )}
                           
+                          {/* Sélectionner un logo existant */}
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => setLogoSelectorTarget(`interet-${index}`)}
+                              className="w-full bg-scout-orange/20 hover:bg-scout-orange/30 text-scout-orange font-bold py-2 px-4 rounded-lg uppercase tracking-wide transition-all text-sm"
+                            >
+                              Sélectionner un logo existant
+                            </button>
+                          </div>
+
                           {/* Upload de fichier */}
                           <div>
                             <label className="block text-white/60 text-xs font-bold mb-2 uppercase tracking-wide">
-                              Télécharger une image
+                              Télécharger une nouvelle image
                             </label>
                             <div className="relative">
                               <input
@@ -1778,6 +1851,54 @@ export default function EditFormulairePage() {
           </form>
         </div>
       </div>
+
+      {/* Modale de sélection de logo */}
+      {logoSelectorTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setLogoSelectorTarget(null)}>
+          <div className="bg-scout-card border border-white/10 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white uppercase tracking-wide">
+                Sélectionner un logo
+              </h2>
+              <button
+                type="button"
+                onClick={() => setLogoSelectorTarget(null)}
+                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                title="Fermer"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {availableLogos.length === 0 ? (
+                <p className="text-white/40 text-sm text-center py-8">Aucun logo disponible</p>
+              ) : (
+                <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                  {availableLogos.map((logo) => (
+                    <button
+                      key={logo.path}
+                      type="button"
+                      onClick={() => handleLogoSelect(logo.path)}
+                      className="relative aspect-square rounded-lg border-2 border-white/20 hover:border-scout-orange transition-colors overflow-hidden bg-white/5 p-2 group"
+                      title={logo.filename}
+                    >
+                      <img
+                        src={logo.path}
+                        alt={logo.filename}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-scout-orange/0 group-hover:bg-scout-orange/20 transition-colors rounded-lg" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
