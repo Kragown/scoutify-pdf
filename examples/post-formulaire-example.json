@@ -9,13 +9,15 @@
   "poste_principal": "BU",
   "poste_secondaire": "AG",
   "url_transfermarkt": "https://www.transfermarkt.fr/kylian-mbappe/profil/spieler/342229",
-  "photo_joueur": "/photos/mbappe.jpg",
+  "photo_joueur": "",
   "vma": 18.5,
   "envergure": null,
   "email": "kylian.mbappe@example.com",
   "telephone": "+33612345678",
   "email_agent_sportif": "agent@example.com",
   "telephone_agent_sportif": "+33687654321",
+  "status": "À traiter",
+  "archive": false,
   "qualites": [
     "Vitesse",
     "Finition",
@@ -25,33 +27,34 @@
   "saisons": [
     {
       "club": "Paris Saint-Germain",
-      "categorie": "Séniors",
+      "categorie": "U20 National",
       "division": "Ligue 1",
-      "periode": "2023-2024",
+      "periode": "2024-2025",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/psg.png",
-      "logo_division": "/logos/ligue1.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": true,
       "badge_surclasse": false,
       "badge_champion": true,
       "badge_coupe_remportee": true,
-      "matchs": 35,
-      "buts": 28,
-      "passes_decisives": 7,
-      "temps_jeu_moyen": 85,
+      "matchs": null,
+      "buts": null,
+      "passes_decisives": null,
+      "temps_jeu_moyen": null,
+      "clean_sheets": null,
       "saison_actuelle": true,
       "ordre": 0
     },
     {
       "club": "AS Monaco",
-      "categorie": "Séniors",
+      "categorie": "U19",
       "division": "Ligue 1",
-      "periode": "2016-2017",
+      "periode": "2020-2021",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/monaco.png",
-      "logo_division": "/logos/ligue1.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": false,
       "badge_surclasse": false,
       "badge_champion": true,
@@ -60,25 +63,26 @@
       "buts": 15,
       "passes_decisives": 11,
       "temps_jeu_moyen": 78,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 1
     }
   ],
   "formations": [
     {
-      "annee_ou_periode": "2010-2015",
+      "annee_ou_periode": "2020-2021",
       "titre_structure": "AS Bondy",
       "details": "Formation complète de la catégorie U11 à U17",
       "ordre": 0
     },
     {
-      "annee_ou_periode": "2015-2017",
+      "annee_ou_periode": "2021-2022",
       "titre_structure": "Centre de Formation AS Monaco",
       "details": "Formation professionnelle, intégration en équipe première",
       "ordre": 1
     },
     {
-      "annee_ou_periode": "2017",
+      "annee_ou_periode": "2022-2023",
       "titre_structure": "Sélection France U19",
       "details": "Champion d'Europe U19",
       "ordre": 2
@@ -88,13 +92,13 @@
     {
       "club": "Real Madrid",
       "annee": "2024",
-      "logo_club": "/logos/real-madrid.png",
+      "logo_club": "",
       "ordre": 0
     },
     {
       "club": "Liverpool FC",
-      "annee": "2024",
-      "logo_club": "/logos/liverpool.png",
+      "annee": "2025",
+      "logo_club": "",
       "ordre": 1
     }
   ]

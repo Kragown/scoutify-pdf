@@ -1,5 +1,7 @@
 {
   "nom": "Giroud",
   "prenom": "Olivier",
-  "qualites": ["Technique", "Vision", "Leadership"]
+  "qualites": ["Technique", "Vision", "Leadership"],
+  "status": "Traité",
+  "archive": false
 }

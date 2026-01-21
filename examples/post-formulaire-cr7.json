@@ -9,13 +9,15 @@
   "poste_principal": "BU",
   "poste_secondaire": "AD",
   "url_transfermarkt": "https://www.transfermarkt.fr/cristiano-ronaldo/profil/spieler/8198",
-  "photo_joueur": "/photos/cr7.jpg",
+  "photo_joueur": "",
   "vma": 19.0,
   "envergure": null,
   "email": "cristiano.ronaldo@example.com",
   "telephone": "+351912345678",
   "email_agent_sportif": "mendes@example.com",
   "telephone_agent_sportif": "+351987654321",
+  "status": "Traité",
+  "archive": false,
   "qualites": [
     "Finition",
     "Vitesse",
@@ -27,13 +29,13 @@
   "saisons": [
     {
       "club": "Al-Nassr",
-      "categorie": "Séniors",
+      "categorie": "U20",
       "division": "Autre",
-      "periode": "2023-2024",
+      "periode": "2024-2025",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/al-nassr.png",
-      "logo_division": "/logos/saudi-pro-league.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": true,
       "badge_surclasse": false,
       "badge_champion": false,
@@ -42,18 +44,19 @@
       "buts": null,
       "passes_decisives": null,
       "temps_jeu_moyen": null,
+      "clean_sheets": null,
       "saison_actuelle": true,
       "ordre": 0
     },
     {
       "club": "Manchester United",
-      "categorie": "Séniors",
+      "categorie": "U19",
       "division": "Autre",
       "periode": "2021-2022",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/manchester-united.png",
-      "logo_division": "/logos/premier-league.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": false,
       "badge_surclasse": false,
       "badge_champion": false,
@@ -62,18 +65,19 @@
       "buts": 24,
       "passes_decisives": 3,
       "temps_jeu_moyen": 85,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 1
     },
     {
       "club": "Real Madrid",
-      "categorie": "Séniors",
+      "categorie": "U18",
       "division": "Autre",
-      "periode": "2017-2018",
+      "periode": "2020-2021",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/real-madrid.png",
-      "logo_division": "/logos/la-liga.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": false,
       "badge_surclasse": false,
       "badge_champion": true,
@@ -82,25 +86,26 @@
       "buts": 42,
       "passes_decisives": 12,
       "temps_jeu_moyen": 88,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 2
     }
   ],
   "formations": [
     {
-      "annee_ou_periode": "1995-1997",
+      "annee_ou_periode": "2020-2021",
       "titre_structure": "Andorinha",
       "details": "Club de quartier à Funchal, débuts du football",
       "ordre": 0
     },
     {
-      "annee_ou_periode": "1997-2002",
+      "annee_ou_periode": "2021-2022",
       "titre_structure": "Sporting CP - Centre de Formation",
       "details": "Formation complète, intégration en équipe première à 17 ans",
       "ordre": 1
     },
     {
-      "annee_ou_periode": "2003",
+      "annee_ou_periode": "2022-2023",
       "titre_structure": "Sélection Portugal U21",
       "details": "Première sélection en équipe nationale",
       "ordre": 2
@@ -110,13 +115,13 @@
     {
       "club": "Real Madrid",
       "annee": "2024",
-      "logo_club": "/logos/real-madrid.png",
+      "logo_club": "",
       "ordre": 0
     },
     {
       "club": "Manchester United",
-      "annee": "2024",
-      "logo_club": "/logos/manchester-united.png",
+      "annee": "2025",
+      "logo_club": "",
       "ordre": 1
     }
   ]

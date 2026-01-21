@@ -9,13 +9,15 @@
   "poste_principal": "BU",
   "poste_secondaire": null,
   "url_transfermarkt": "https://www.transfermarkt.fr/zlatan-ibrahimovic/profil/spieler/3455",
-  "photo_joueur": "/photos/zlatan.jpg",
+  "photo_joueur": "",
   "vma": 17.0,
   "envergure": null,
   "email": "zlatan.ibrahimovic@example.com",
   "telephone": "+46701234567",
   "email_agent_sportif": "mino@example.com",
   "telephone_agent_sportif": "+46709876543",
+  "status": "Traité",
+  "archive": true,
   "qualites": [
     "Finition",
     "Tête",
@@ -27,13 +29,13 @@
   "saisons": [
     {
       "club": "AC Milan",
-      "categorie": "Séniors",
+      "categorie": "U20",
       "division": "Autre",
       "periode": "2020-2021",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/ac-milan.png",
-      "logo_division": "/logos/serie-a.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": true,
       "badge_surclasse": false,
       "badge_champion": true,
@@ -42,18 +44,19 @@
       "buts": 8,
       "passes_decisives": 3,
       "temps_jeu_moyen": 75,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 0
     },
     {
       "club": "LA Galaxy",
-      "categorie": "Séniors",
+      "categorie": "U19",
       "division": "Autre",
-      "periode": "2019",
+      "periode": "2021-2022",
       "mi_saison": true,
       "periode_type": "Été",
-      "logo_club": "/logos/la-galaxy.png",
-      "logo_division": "/logos/mls.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": true,
       "badge_surclasse": false,
       "badge_champion": false,
@@ -62,18 +65,19 @@
       "buts": 31,
       "passes_decisives": 8,
       "temps_jeu_moyen": 88,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 1
     },
     {
       "club": "Manchester United",
-      "categorie": "Séniors",
+      "categorie": "U18",
       "division": "Autre",
-      "periode": "2016-2017",
+      "periode": "2022-2023",
       "mi_saison": true,
       "periode_type": "Hiver",
-      "logo_club": "/logos/manchester-united.png",
-      "logo_division": "/logos/premier-league.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": false,
       "badge_surclasse": false,
       "badge_champion": false,
@@ -82,18 +86,19 @@
       "buts": 17,
       "passes_decisives": 5,
       "temps_jeu_moyen": 80,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 2
     },
     {
       "club": "Paris Saint-Germain",
-      "categorie": "Séniors",
+      "categorie": "U17",
       "division": "Ligue 1",
-      "periode": "2012-2013",
+      "periode": "2023-2024",
       "mi_saison": false,
       "periode_type": null,
-      "logo_club": "/logos/psg.png",
-      "logo_division": "/logos/ligue1.png",
+      "logo_club": "",
+      "logo_division": "",
       "badge_capitanat": true,
       "badge_surclasse": false,
       "badge_champion": true,
@@ -102,25 +107,26 @@
       "buts": 30,
       "passes_decisives": 10,
       "temps_jeu_moyen": 85,
+      "clean_sheets": null,
       "saison_actuelle": false,
       "ordre": 3
     }
   ],
   "formations": [
     {
-      "annee_ou_periode": "1991-1995",
+      "annee_ou_periode": "2020-2021",
       "titre_structure": "Malmö FF - École de Football",
       "details": "Débuts au football, catégories jeunes",
       "ordre": 0
     },
     {
-      "annee_ou_periode": "1995-1999",
+      "annee_ou_periode": "2021-2022",
       "titre_structure": "Malmö FF - Centre de Formation",
       "details": "Formation complète, intégration en équipe première à 18 ans",
       "ordre": 1
     },
     {
-      "annee_ou_periode": "2001",
+      "annee_ou_periode": "2022-2023",
       "titre_structure": "Sélection Suède U21",
       "details": "Première sélection en équipe nationale",
       "ordre": 2
@@ -130,13 +136,13 @@
     {
       "club": "AC Milan",
       "annee": "2024",
-      "logo_club": "/logos/ac-milan.png",
+      "logo_club": "",
       "ordre": 0
     },
     {
       "club": "Hammarby IF",
-      "annee": "2024",
-      "logo_club": "/logos/hammarby.png",
+      "annee": "2025",
+      "logo_club": "",
       "ordre": 1
     }
   ]
