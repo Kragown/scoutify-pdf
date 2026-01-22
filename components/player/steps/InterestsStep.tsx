@@ -41,13 +41,6 @@ export function InterestsStep() {
         // Fusion des données pour l'envoi final
         const finalData = { ...data, interets: formData.interets };
 
-        // Validation: vérifier que la photo est présente
-        if (!finalData.photoUrl || finalData.photoUrl.trim() === "") {
-            alert("⚠️ Photo manquante\n\nVeuillez retourner à l'étape 1 (Identité) et uploader une photo du joueur avant de finaliser votre CV.");
-            setIsSubmitting(false);
-            return;
-        }
-
         try {
             const payload = {
                 nom: finalData.lastName,
@@ -139,6 +132,9 @@ export function InterestsStep() {
 
             // Reset data and Redirect to landing page
             reset();
+            
+            // Afficher le message de succès
+            alert("✅ Formulaire envoyé avec succès !");
             router.push('/');
 
         } catch (error: any) {

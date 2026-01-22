@@ -29,7 +29,7 @@ const POSITIONS_352: Record<string, { x: number; y: number; label: string }> = {
 const POSITIONS_433: Record<string, { x: number; y: number; label: string }> = {
     "GB": { x: 50, y: 90, label: "Gardien" },
     "DG": { x: 15, y: 75, label: "Défenseur Gauche" },
-    "DC": { x: 40, y: 78, label: "Défenseur Central" },
+    "DC": { x: 50, y: 78, label: "Défenseur Central" },
     "DD": { x: 85, y: 75, label: "Défenseur Droit" },
     "MDC": { x: 50, y: 55, label: "Milieu Défensif Central" },
     "MC": { x: 35, y: 45, label: "Milieu Central" },

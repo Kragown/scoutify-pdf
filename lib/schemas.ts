@@ -148,7 +148,7 @@ export const fullPlayerSchema = identitySchema
     .merge(positionSchema)
     .merge(linksSchema)
     .extend({
-        photoUrl: z.string().optional(),
+        photoUrl: z.string().min(1, "Photo de profil requise"),
         qualites: qualitesSchema.optional(),
         career: z.array(careerStepSchema).optional(),
         saisons: saisonsSchema.optional(),

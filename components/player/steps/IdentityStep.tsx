@@ -14,7 +14,7 @@ const step1Schema = identitySchema
     .merge(physicalSchema)
     .merge(linksSchema)
     .extend({
-        photoUrl: z.string().optional(),
+        photoUrl: z.string().min(1, "Photo de profil requise"),
     });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -58,7 +58,7 @@ export function IdentityStep() {
             envergure: data.envergure || "",
             statsLink: data.statsLink || "",
             videoLink: data.videoLink || "",
-            photoUrl: data.photoUrl || undefined,
+            photoUrl: data.photoUrl || "",
         },
         mode: "onBlur"
     });
@@ -387,7 +387,8 @@ export function IdentityStep() {
                     </InputGroup>
 
                     {/* Upload photo - Convertit en base64 */}
-                    <InputGroup label="Photo de profil" error={form.formState.errors.photoUrl?.message}>
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-white/80">Photo de profil <span className="text-red-500">*</span></label>
                         <input
                             type="file"
                             accept="image/*"
@@ -404,7 +405,10 @@ export function IdentityStep() {
                             }}
                             className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-scout-orange file:text-black hover:file:bg-orange-600"
                         />
-                    </InputGroup>
+                        {form.formState.errors.photoUrl && (
+                            <span className="text-red-400 text-xs">{form.formState.errors.photoUrl.message}</span>
+                        )}
+                    </div>
                 </div>
             </div>
 
