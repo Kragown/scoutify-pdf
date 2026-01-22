@@ -1,0 +1,972 @@
+openapi: 3.0.3
+info:
+  title: Scoutify PDF API
+  description: API pour la gestion des formulaires de joueurs et génération de CV en PDF
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000
+    description: Serveur de développement
+  - url: https://api.scoutify.com
+    description: Serveur de production
+
+tags:
+  - name: Formulaires Joueur
+    description: Gestion des formulaires de joueurs
+  - name: PDF
+    description: Génération de CV en PDF
+  - name: Upload
+    description: Upload de fichiers (photos, logos)
+  - name: Logos
+    description: Gestion des logos
+
+paths:
+  /api/formulaires-joueur:
+    get:
+      tags:
+        - Formulaires Joueur
+      summary: Liste tous les formulaires de joueurs
+      description: Récupère la liste de tous les formulaires de joueurs avec leurs qualités, saisons, formations et intérêts
+      operationId: getFormulairesJoueur
+      responses:
+        '200':
+          description: Liste des formulaires récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FormulaireJoueur'
+                  count:
+                    type: integer
+                    example: 10
+        '500':
+          $ref: '#/components/responses/Error500'
+
+    post:
+      tags:
+        - Formulaires Joueur
+      summary: Crée un nouveau formulaire de joueur
+      description: Crée un nouveau formulaire de joueur avec toutes ses informations, qualités, saisons, formations et intérêts
+      operationId: createFormulaireJoueur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFormulaireJoueurDto'
+            examples:
+              minimal:
+                $ref: '#/components/examples/CreateFormulaireMinimal'
+              complete:
+                $ref: '#/components/examples/CreateFormulaireComplete'
+      responses:
+        '201':
+          description: Formulaire créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FormulaireJoueur'
+                  message:
+                    type: string
+                    example: Formulaire de joueur créé avec succès
+        '400':
+          $ref: '#/components/responses/Error400'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/formulaires-joueur/{id}:
+    get:
+      tags:
+        - Formulaires Joueur
+      summary: Récupère un formulaire de joueur par ID
+      description: Récupère les détails complets d'un formulaire de joueur avec toutes ses relations
+      operationId: getFormulaireJoueurById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du formulaire de joueur
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Formulaire récupéré avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FormulaireJoueur'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+    put:
+      tags:
+        - Formulaires Joueur
+      summary: Met à jour un formulaire de joueur
+      description: Met à jour partiellement ou complètement un formulaire de joueur existant
+      operationId: updateFormulaireJoueur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du formulaire de joueur
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFormulaireJoueurDto'
+      responses:
+        '200':
+          description: Formulaire mis à jour avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FormulaireJoueur'
+                  message:
+                    type: string
+                    example: Formulaire mis à jour avec succès
+        '400':
+          $ref: '#/components/responses/Error400'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+    delete:
+      tags:
+        - Formulaires Joueur
+      summary: Supprime un formulaire de joueur
+      description: Supprime un formulaire de joueur et toutes ses relations (cascade)
+      operationId: deleteFormulaireJoueur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du formulaire de joueur
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Formulaire supprimé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Formulaire supprimé avec succès
+        '400':
+          $ref: '#/components/responses/Error400'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/formulaires-joueur/{id}/pdf:
+    get:
+      tags:
+        - PDF
+      summary: Génère le CV PDF d'un joueur
+      description: Génère un CV en format PDF pour un formulaire de joueur donné
+      operationId: generatePDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du formulaire de joueur
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: PDF généré avec succès
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/Error400'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/upload:
+    post:
+      tags:
+        - Upload
+      summary: Upload un fichier (photo ou logo)
+      description: Upload un fichier image (photo de joueur ou logo) et retourne le chemin relatif
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Fichier image à uploader
+                type:
+                  type: string
+                  enum: [photo, logo]
+                  default: photo
+                  description: Type de fichier (photo ou logo)
+      responses:
+        '200':
+          description: Fichier uploadé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  path:
+                    type: string
+                    example: /photos/1234567890-abc123.jpg
+                  message:
+                    type: string
+                    example: Fichier uploadé avec succès
+        '400':
+          $ref: '#/components/responses/Error400'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/logos:
+    get:
+      tags:
+        - Logos
+      summary: Liste tous les logos disponibles
+      description: Récupère la liste de tous les logos disponibles dans le dossier public/logos
+      operationId: getLogos
+      responses:
+        '200':
+          description: Liste des logos récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  logos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filename:
+                          type: string
+                          example: logo-club.jpg
+                        path:
+                          type: string
+                          example: /logos/logo-club.jpg
+        '500':
+          $ref: '#/components/responses/Error500'
+
+components:
+  schemas:
+    FormulaireJoueur:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nom:
+          type: string
+          example: Messi
+        prenom:
+          type: string
+          example: Lionel
+        nationalites:
+          type: string
+          description: JSON string ou array stringifié
+          example: '["Argentine"]'
+        date_naissance:
+          type: string
+          format: date
+          example: '1987-06-24'
+        pied_fort:
+          type: string
+          enum: [Droit, Gauche, Ambidextre]
+          example: Gauche
+        taille_cm:
+          type: integer
+          example: 170
+        couleur_cv:
+          type: string
+          example: '#DC2626'
+        poste_principal:
+          $ref: '#/components/schemas/Poste'
+        poste_secondaire:
+          $ref: '#/components/schemas/Poste'
+          nullable: true
+        url_transfermarkt:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.transfermarkt.com/lionel-messi/profil/spieler/28003
+        photo_joueur:
+          type: string
+          example: /photos/1234567890-abc123.jpg
+        vma:
+          type: number
+          nullable: true
+          example: 32.5
+        envergure:
+          type: number
+          nullable: true
+          example: 175
+        email:
+          type: string
+          format: email
+          example: lionel.messi@example.com
+        telephone:
+          type: string
+          example: '+5491123456789'
+        email_agent_sportif:
+          type: string
+          format: email
+          nullable: true
+        telephone_agent_sportif:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [À traiter, Traité]
+          example: À traiter
+        archive:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        qualites:
+          type: array
+          items:
+            $ref: '#/components/schemas/Qualite'
+        saisons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Saison'
+        formations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Formation'
+        interets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interet'
+
+    CreateFormulaireJoueurDto:
+      type: object
+      required:
+        - nom
+        - prenom
+        - nationalites
+        - date_naissance
+        - pied_fort
+        - taille_cm
+        - couleur_cv
+        - poste_principal
+        - photo_joueur
+        - email
+        - telephone
+        - qualites
+        - saisons
+      properties:
+        nom:
+          type: string
+          example: Messi
+        prenom:
+          type: string
+          example: Lionel
+        nationalites:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: ['Argentine']
+        date_naissance:
+          type: string
+          format: date
+          example: '1987-06-24'
+        pied_fort:
+          type: string
+          enum: [Droit, Gauche, Ambidextre]
+          example: Gauche
+        taille_cm:
+          type: integer
+          minimum: 1
+          example: 170
+        couleur_cv:
+          type: string
+          example: '#DC2626'
+        poste_principal:
+          $ref: '#/components/schemas/Poste'
+        poste_secondaire:
+          $ref: '#/components/schemas/Poste'
+          nullable: true
+        url_transfermarkt:
+          type: string
+          format: uri
+          nullable: true
+        photo_joueur:
+          type: string
+          example: /photos/1234567890-abc123.jpg
+        vma:
+          type: number
+          nullable: true
+        envergure:
+          type: number
+          nullable: true
+        email:
+          type: string
+          format: email
+          example: lionel.messi@example.com
+        telephone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: '+5491123456789'
+        email_agent_sportif:
+          type: string
+          format: email
+          nullable: true
+        telephone_agent_sportif:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [À traiter, Traité]
+          default: À traiter
+        archive:
+          type: boolean
+          default: false
+        qualites:
+          type: array
+          minItems: 1
+          maxItems: 6
+          items:
+            type: string
+            maxLength: 24
+          example: [Dribble, Passe, Vision]
+        saisons:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CreateSaisonDto'
+        formations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateFormationDto'
+        interets:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateInteretDto'
+
+    UpdateFormulaireJoueurDto:
+      type: object
+      description: Tous les champs sont optionnels pour une mise à jour partielle
+      allOf:
+        - $ref: '#/components/schemas/CreateFormulaireJoueurDto'
+        - type: object
+          properties: {}
+
+    Qualite:
+      type: object
+      properties:
+        id:
+          type: integer
+        formulaire_joueur_id:
+          type: integer
+        libelle:
+          type: string
+          maxLength: 24
+          example: Dribble
+        ordre:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+
+    Saison:
+      type: object
+      properties:
+        id:
+          type: integer
+        formulaire_joueur_id:
+          type: integer
+        club:
+          type: string
+          example: FC Barcelone
+        categorie:
+          type: string
+          example: U17
+        division:
+          $ref: '#/components/schemas/Division'
+        periode:
+          type: string
+          nullable: true
+          example: '2024 - 2025'
+        mi_saison:
+          type: boolean
+          example: false
+        periode_type:
+          type: string
+          enum: [Hiver, Été]
+          nullable: true
+        logo_club:
+          type: string
+          example: /logos/fc-barcelone.jpg
+        logo_division:
+          type: string
+          example: /logos/ligue1.jpg
+        badge_capitanat:
+          type: boolean
+          example: true
+        badge_surclasse:
+          type: boolean
+          example: false
+        badge_champion:
+          type: boolean
+          example: true
+        badge_coupe_remportee:
+          type: boolean
+          example: true
+        matchs:
+          type: integer
+          nullable: true
+          minimum: 0
+          example: 35
+        buts:
+          type: integer
+          nullable: true
+          minimum: 0
+          example: 30
+        passes_decisives:
+          type: integer
+          nullable: true
+          minimum: 0
+          example: 9
+        temps_jeu_moyen:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 90
+          example: 85
+        clean_sheets:
+          type: integer
+          nullable: true
+          minimum: 0
+          example: 5
+        saison_actuelle:
+          type: boolean
+          example: false
+        ordre:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateSaisonDto:
+      type: object
+      required:
+        - club
+        - categorie
+        - division
+        - logo_club
+        - logo_division
+      properties:
+        club:
+          type: string
+          example: FC Barcelone
+        categorie:
+          type: string
+          example: U17
+        division:
+          $ref: '#/components/schemas/Division'
+        periode:
+          type: string
+          nullable: true
+        mi_saison:
+          type: boolean
+          default: false
+        periode_type:
+          type: string
+          enum: [Hiver, Été]
+          nullable: true
+        logo_club:
+          type: string
+          example: /logos/fc-barcelone.jpg
+        logo_division:
+          type: string
+          example: /logos/ligue1.jpg
+        badge_capitanat:
+          type: boolean
+          default: false
+        badge_surclasse:
+          type: boolean
+          default: false
+        badge_champion:
+          type: boolean
+          default: false
+        badge_coupe_remportee:
+          type: boolean
+          default: false
+        matchs:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Obligatoire sauf si saison_actuelle = true
+        buts:
+          type: integer
+          nullable: true
+          minimum: 0
+        passes_decisives:
+          type: integer
+          nullable: true
+          minimum: 0
+        temps_jeu_moyen:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 90
+        clean_sheets:
+          type: integer
+          nullable: true
+          minimum: 0
+        saison_actuelle:
+          type: boolean
+          default: false
+        ordre:
+          type: integer
+          default: 0
+
+    Formation:
+      type: object
+      properties:
+        id:
+          type: integer
+        formulaire_joueur_id:
+          type: integer
+        annee_ou_periode:
+          type: string
+          example: '2022 - 2023'
+        titre_structure:
+          type: string
+          maxLength: 1000
+          example: La Masia - FC Barcelone
+        details:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: Formation complète au centre de formation du Barça
+        ordre:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateFormationDto:
+      type: object
+      required:
+        - annee_ou_periode
+        - titre_structure
+      properties:
+        annee_ou_periode:
+          type: string
+          example: '2022 - 2023'
+        titre_structure:
+          type: string
+          maxLength: 1000
+          example: La Masia - FC Barcelone
+        details:
+          type: string
+          maxLength: 1000
+          nullable: true
+        ordre:
+          type: integer
+          default: 0
+
+    Interet:
+      type: object
+      properties:
+        id:
+          type: integer
+        formulaire_joueur_id:
+          type: integer
+        club:
+          type: string
+          example: Inter Miami
+        annee:
+          type: string
+          pattern: '^\d{4}$'
+          example: '2023'
+        logo_club:
+          type: string
+          example: /logos/inter-miami.jpg
+        ordre:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateInteretDto:
+      type: object
+      required:
+        - club
+        - annee
+        - logo_club
+      properties:
+        club:
+          type: string
+          maxLength: 200
+          example: Inter Miami
+        annee:
+          type: string
+          pattern: '^\d{4}$'
+          example: '2023'
+        logo_club:
+          type: string
+          example: /logos/inter-miami.jpg
+        ordre:
+          type: integer
+          default: 0
+
+    Poste:
+      type: string
+      enum:
+        - GB
+        - DG
+        - DC
+        - DD
+        - MDC
+        - MC
+        - MOC
+        - AG
+        - AD
+        - BU
+        - 'Piston G'
+        - 'Piston D'
+      example: BU
+
+    Division:
+      type: string
+      enum:
+        - 'Ligue 1'
+        - 'Ligue 2'
+        - National
+        - 'National 2'
+        - 'National 3'
+        - 'Régional 1'
+        - 'Régional 2'
+        - 'Régional 3'
+        - 'Départemental 1'
+        - 'Départemental 2'
+        - 'Départemental 3'
+        - Autre
+      example: 'Ligue 1'
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Message d'erreur détaillé
+        details:
+          type: string
+          nullable: true
+
+  responses:
+    Error400:
+      description: Requête invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: Tous les champs obligatoires doivent être remplis
+
+    Error404:
+      description: Ressource non trouvée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: Formulaire non trouvé
+
+    Error500:
+      description: Erreur serveur
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: Erreur lors de la récupération des formulaires
+
+  examples:
+    CreateFormulaireMinimal:
+      value:
+        nom: Messi
+        prenom: Lionel
+        nationalites: ['Argentine']
+        date_naissance: '1987-06-24'
+        pied_fort: Gauche
+        taille_cm: 170
+        couleur_cv: '#DC2626'
+        poste_principal: BU
+        photo_joueur: /photos/messi.jpg
+        email: lionel.messi@example.com
+        telephone: '+5491123456789'
+        qualites: [Dribble, Passe]
+        saisons:
+          - club: FC Barcelone
+            categorie: U17
+            division: 'Ligue 1'
+            logo_club: /logos/fc-barcelone.jpg
+            logo_division: /logos/ligue1.jpg
+            matchs: 30
+            saison_actuelle: false
+
+    CreateFormulaireComplete:
+      value:
+        nom: Messi
+        prenom: Lionel
+        nationalites: ['Argentine']
+        date_naissance: '1987-06-24'
+        pied_fort: Gauche
+        taille_cm: 170
+        couleur_cv: '#DC2626'
+        poste_principal: BU
+        poste_secondaire: MOC
+        url_transfermarkt: https://www.transfermarkt.com/lionel-messi/profil/spieler/28003
+        photo_joueur: /photos/messi.jpg
+        vma: 32.5
+        envergure: 175
+        email: lionel.messi@example.com
+        telephone: '+5491123456789'
+        email_agent_sportif: agent@example.com
+        telephone_agent_sportif: '+33123456789'
+        status: À traiter
+        archive: false
+        qualites: [Dribble, Passe, Vision, Finition, Technique, Créativité]
+        saisons:
+          - club: Inter Miami
+            categorie: U17
+            division: Autre
+            periode: '2024 - 2025'
+            logo_club: /logos/inter-miami.jpg
+            logo_division: /logos/mls.jpg
+            badge_capitanat: true
+            badge_champion: false
+            badge_coupe_remportee: true
+            matchs: 35
+            buts: 30
+            passes_decisives: 9
+            temps_jeu_moyen: 85
+            clean_sheets: 5
+            saison_actuelle: true
+            ordre: 0
+          - club: FC Barcelone
+            categorie: U13
+            division: 'Ligue 1'
+            periode: '2018 - 2019'
+            logo_club: /logos/fc-barcelone.jpg
+            logo_division: /logos/ligue1.jpg
+            badge_capitanat: true
+            badge_champion: true
+            badge_coupe_remportee: true
+            matchs: 30
+            buts: 30
+            passes_decisives: 9
+            saison_actuelle: false
+            ordre: 1
+        formations:
+          - annee_ou_periode: '2022 - 2023'
+            titre_structure: Sélection Argentine U20 - Champion du Monde U20
+            details: null
+            ordre: 0
+          - annee_ou_periode: '2021 - 2022'
+            titre_structure: La Masia - FC Barcelone
+            details: Formation complète au centre de formation du Barça, intégration en équipe première à 17 ans
+            ordre: 1
+        interets:
+          - club: Inter Miami
+            annee: '2023'
+            logo_club: /logos/inter-miami.jpg
+            ordre: 0
+          - club: FC Barcelone
+            annee: '2024'
+            logo_club: /logos/fc-barcelone.jpg
+            ordre: 1
